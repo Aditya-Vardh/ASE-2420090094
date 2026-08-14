@@ -38,69 +38,21 @@ function ensureHeader(code: string, diagramType: DiagramType = "architecture"): 
 }
 
 function quoteFlowchartLabels(line: string): string {
-  return line.replace(
-    /(\w+)\[([^\]"]+)\]/g,
-    (_, id, label) => {
-      if (/[()/:,]/.test(label)) {
+  return line
+    .replace(/(\w+)\[([^\]"]+)\]/g, (_, id, label) => {
+      if (/[()/:,&-]/.test(label)) {
         const safe = label.replace(/"/g, "'");
         return `${id}["${safe}"]`;
       }
       return `${id}[${label}]`;
-    },
-  ).replace(
-    /(\w+)\(([^)"]+)\)/g,
-    (_, id, label) => {
-      if (/[\\/:,]/.test(label)) {
+    })
+    .replace(/(\w+)\(([^)"]+)\)/g, (_, id, label) => {
+      if (/[\\/:,&-]/.test(label)) {
         const safe = label.replace(/"/g, "'");
         return `${id}("${safe}")`;
       }
-      return `${id}(${label})`;
-    },
-  );
-}
-
-function sanitizeNodeIds(code: string): string {
-  const lines = code.split("\n");
-  const idMap = new Map<string, string>();
-  let counter = 0;
-
-  function cleanId(raw: string): string {
-    if (/^[a-zA-Z_]\w*$/.test(raw)) return raw;
-    if (idMap.has(raw)) return idMap.get(raw)!;
-    const id = `N${++counter}`;
-    idMap.set(raw, id);
-    return id;
-  }
-
-  return lines
-    .map((line) => {
-      const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith("%%") || trimmed.startsWith("subgraph") || trimmed === "end") {
-        return line;
-      }
-
-      if (/^(classDiagram|sequenceDiagram|erDiagram|flowchart|stateDiagram|graph)\b/i.test(trimmed)) {
-        return line;
-      }
-
-      let result = quoteFlowchartLabels(trimmed);
-
-      result = result.replace(/\b([A-Za-z][\w\s.-]*?)\s*(-->|---|<--|<-->|==>|-.->|\|\|--o\{|o--\||\*\-\-|\-\-\*|<\|--|\|>|\(\-\)|\(\-\-\)|\.-\.|\-\.\-)\s*([A-Za-z][\w\s.-]*)/g, (match, from, arrow, to) => {
-        const fromId = cleanId(from.trim().replace(/\s+/g, "_"));
-        const toId = cleanId(to.trim().replace(/\s+/g, "_"));
-        return `${fromId} ${arrow} ${toId}`;
-      });
-
-      return result;
-    })
-    .join("\n");
-}
-
-function fixSubgraphs(code: string): string {
-  return code.replace(/subgraph\s+([^\n\[]+)\[/g, (match, name) => {
-    const safe = name.trim().replace(/"/g, "'");
-    return `subgraph ${safe} [`;
-  });
+      return `${id}("${label}")`;
+    });
 }
 
 function removeInvalidLines(code: string): string {
@@ -120,9 +72,20 @@ export function repairMermaid(code: string, diagramType: DiagramType = "architec
   let repaired = sanitizeMermaid(code);
   repaired = removeInvalidLines(repaired);
   repaired = ensureHeader(repaired, diagramType);
-  repaired = fixSubgraphs(repaired);
-  repaired = sanitizeNodeIds(repaired);
-  return repaired.trim();
+
+  const lines = repaired.split("\n");
+  const processed = lines.map((line) => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("%%") || trimmed.startsWith("subgraph") || trimmed === "end") {
+      return line;
+    }
+    if (/^(classDiagram|sequenceDiagram|erDiagram|flowchart|stateDiagram|graph|autonumber|actor|participant)\b/i.test(trimmed)) {
+      return line;
+    }
+    return quoteFlowchartLabels(line);
+  });
+
+  return processed.join("\n").trim();
 }
 
 export async function renderMermaidSafe(
@@ -134,7 +97,7 @@ export async function renderMermaidSafe(
     code,
     repairMermaid(code, diagramType),
     repairMermaid(code, "flowchart"),
-    `flowchart TB\n    A["System"] --> B["Component"]\n    B --> C[("Database")]`,
+    `flowchart TB\n    A["Client Application"] --> B["API Gateway"]\n    B --> C[("Database")]`,
   ];
 
   let lastError: unknown;

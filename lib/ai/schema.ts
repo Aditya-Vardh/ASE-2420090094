@@ -29,13 +29,13 @@ export const explanationSchema = z.object({
 });
 
 export const adaptiveInsightsSchema = z.object({
-  health: z.number().min(0).max(100),
+  health: z.number(),
   healthLabel: z.string(),
-  scalability: z.number().min(0).max(100),
-  maintainability: z.number().min(0).max(100),
-  reliability: z.number().min(0).max(100),
-  security: z.number().min(0).max(100),
-  adaptability: z.number().min(0).max(100),
+  scalability: z.number(),
+  maintainability: z.number(),
+  reliability: z.number(),
+  security: z.number(),
+  adaptability: z.number(),
   potentialIssues: z.array(z.string()),
   suggestions: z.array(
     z.object({
@@ -59,7 +59,7 @@ export const architectureSchema = z.object({
   mermaidCode: z.string(),
   explanation: explanationSchema,
   technologies: z.array(z.string()),
-  adaptiveInsights: adaptiveInsightsSchema.optional(),
+  adaptiveInsights: adaptiveInsightsSchema,
 });
 
 export const researchSchema = z.object({

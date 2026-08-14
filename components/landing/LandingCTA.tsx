@@ -41,7 +41,7 @@ export default function LandingCTA() {
           {/* CTAs */}
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
-              href="/workspace/generate?new=1"
+              href="/workspace"
               className="group relative inline-flex items-center justify-center gap-2.5 overflow-hidden rounded-full bg-gradient-to-r from-[#dddb9d] via-[#7bc963] to-[#567f2b] px-9 py-4 text-sm font-bold text-[#0a0b04] shadow-[0_0_35px_rgba(123,201,99,0.4)] transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_50px_rgba(123,201,99,0.6)]"
             >
               <Sparkles className="h-4 w-4" />

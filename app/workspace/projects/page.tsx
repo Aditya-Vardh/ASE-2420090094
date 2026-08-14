@@ -28,15 +28,20 @@ export default function ProjectsPage() {
 
   function refresh() {
     const list = getProjects();
-    // Hydrate any project missing a result using fallback synthesizer so all projects render
     const hydrated = list.map((p) => {
+      let cleanTitle = p.title;
+      if (cleanTitle === "sequence Diagram") cleanTitle = "Sequence Flow Spec";
+      else if (cleanTitle === "Untitled Architecture") {
+        cleanTitle = p.prompt ? (p.prompt.length > 30 ? `${p.prompt.slice(0, 27)}...` : p.prompt) : "Custom System Architecture";
+      }
+
       if (!p.result) {
-        const synth = synthesizeFallbackArchitecture(p.prompt || p.title, p.diagramType);
-        const updated = { ...p, result: synth };
+        const synth = synthesizeFallbackArchitecture(p.prompt || cleanTitle, p.diagramType);
+        const updated = { ...p, title: cleanTitle, result: synth };
         saveProject(updated);
         return updated;
       }
-      return p;
+      return { ...p, title: cleanTitle };
     });
     setProjects(hydrated);
   }

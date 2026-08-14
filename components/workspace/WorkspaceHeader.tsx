@@ -40,7 +40,7 @@ export default function WorkspaceHeader({
       {/* Center Studio Pill */}
       <div className="hidden md:flex items-center gap-2 rounded-full border border-[#dddb9d]/15 bg-[#12140a] px-3.5 py-1 text-xs text-[#c8c69d]">
         <Sparkles className="h-3.5 w-3.5 text-[#7bc963]" />
-        <span>ArchiGen AI Studio Canvas</span>
+        <span>Arqen AI Studio Canvas</span>
       </div>
 
       {/* Right Controls */}

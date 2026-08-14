@@ -330,32 +330,33 @@ function GenerateContent() {
               )}
             </div>
 
-            {/* Canvas Main */}
-            <div className="relative flex-1 min-h-0 overflow-hidden" ref={canvasRef}>
-              <ArchitectureCanvas
-                chart={result.mermaidCode}
-                result={result}
-                onRegenerate={() => generate()}
-                selectedComponent={selectedComponent}
-                onSelectComponent={setSelectedComponent}
-              />
+            {/* Main Canvas & Inspector Workspace */}
+            <div className="relative flex flex-1 min-h-0 min-w-0 overflow-hidden">
+              <div className="relative flex-1 min-h-0 overflow-hidden" ref={canvasRef}>
+                <ArchitectureCanvas
+                  chart={result.mermaidCode}
+                  result={result}
+                  onRegenerate={() => generate()}
+                  selectedComponent={selectedComponent}
+                  onSelectComponent={setSelectedComponent}
+                />
+              </div>
+
+              {/* Toggleable Context Inspector Drawer */}
+              {showInspector && (
+                <aside className="w-80 sm:w-96 border-l border-[#dddb9d]/15 bg-[#12140a]/95 backdrop-blur-2xl overflow-y-auto shrink-0 h-full z-10">
+                  <PropertyInspector
+                    result={result}
+                    selectedComponent={selectedComponent}
+                    onSelectComponent={setSelectedComponent}
+                    onRefine={(instruction) => generate(instruction)}
+                    loading={loading}
+                    className="h-full"
+                  />
+                </aside>
+              )}
             </div>
           </div>
-
-        )}
-
-        {/* Toggleable Context Inspector Drawer */}
-        {result && showInspector && (
-          <aside className="w-80 sm:w-96 border-l border-[#dddb9d]/15 bg-[#12140a]/95 backdrop-blur-2xl overflow-y-auto">
-            <PropertyInspector
-              result={result}
-              selectedComponent={selectedComponent}
-              onSelectComponent={setSelectedComponent}
-              onRefine={(instruction) => generate(instruction)}
-              loading={loading}
-              className="h-full"
-            />
-          </aside>
         )}
       </div>
 

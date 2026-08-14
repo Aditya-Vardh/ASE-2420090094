@@ -4,16 +4,18 @@ import Link from "next/link";
 import Image from "next/image";
 import { Sparkles } from "lucide-react";
 
-const githubUrl = process.env.NEXT_PUBLIC_GITHUB_URL ?? "https://github.com";
+const githubUrl =
+  process.env.NEXT_PUBLIC_GITHUB_URL ?? "https://github.com/Aditya-Vardh/ASE-2420090094";
 
 const FOOTER_LINKS = [
   {
     title: "Product Workspace",
     items: [
+      { label: "Dashboard Hub", href: "/workspace" },
       { label: "Studio Canvas", href: "/workspace/generate" },
-      { label: "Starter Templates", href: "/workspace/templates" },
+      { label: "Starter Blueprints", href: "/workspace/templates" },
       { label: "UML Generator", href: "/workspace/uml" },
-      { label: "Research Assistant", href: "/workspace/research" },
+      { label: "AI Research Assistant", href: "/workspace/research" },
     ],
   },
   {
@@ -21,17 +23,17 @@ const FOOTER_LINKS = [
     items: [
       { label: "GitHub Repository", href: githubUrl, external: true },
       { label: "System How-It-Works", href: "#how-it-works" },
-      { label: "Architecture Examples", href: "#examples" },
-      { label: "Settings & API Keys", href: "/workspace/settings" },
+      { label: "Architecture Blueprints", href: "#examples" },
+      { label: "Workspace Settings", href: "/workspace/settings" },
     ],
   },
   {
     title: "Capabilities",
     items: [
-      { label: "Mermaid.js Renderer", href: "/workspace/generate" },
-      { label: "Adaptive Insights", href: "/workspace" },
-      { label: "SVG & PNG Export", href: "/workspace/generate" },
-      { label: "Local Storage Privacy", href: "/workspace/history" },
+      { label: "Mermaid SVG Canvas", href: "/workspace/generate" },
+      { label: "Structural Audit", href: "/workspace" },
+      { label: "SVG, PNG & MD Exports", href: "/workspace/generate" },
+      { label: "In-Browser Privacy Storage", href: "/workspace/history" },
     ],
   },
 ];
@@ -47,22 +49,22 @@ export default function LandingFooter() {
             <Link href="/" className="group mb-4 inline-flex items-center gap-3">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#dddb9d] via-[#7bc963] to-[#567f2b] p-[1px] shadow-[0_0_20px_rgba(123,201,99,0.3)]">
                 <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-[#0a0b04]">
-                  <Image src="/icon.svg" alt="ArchiGen Logo" width={22} height={22} className="rounded-md" aria-hidden />
+                  <Image src="/icon.svg" alt="Arqen Logo" width={22} height={22} className="rounded-md" aria-hidden />
                 </div>
               </div>
               <div className="flex flex-col">
                 <span className="text-base font-bold tracking-tight text-[#f2f1da] group-hover:text-[#7bc963] transition-colors">
-                  ArchiGen<span className="text-[#7bc963]">AI</span>
+                  Arqen<span className="text-[#7bc963]">AI</span>
                 </span>
                 <span className="text-[9px] font-semibold tracking-widest uppercase text-[#8e8c6c] -mt-1">
-                  Architecture Engine
+                  Design · Intelligence · Future
                 </span>
               </div>
             </Link>
 
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-[#8e8c6c]">
-              Transform system concepts into production software diagrams, UML schemas,
-              and architectural insights powered by Groq &amp; OpenAI.
+              Turn system descriptions into exportable UML diagrams, microservice maps,
+              and architectural specifications in seconds.
             </p>
 
             <div className="mt-6 flex items-center gap-3">
@@ -116,12 +118,13 @@ export default function LandingFooter() {
         {/* Bottom Status Bar */}
         <div className="flex flex-col items-center justify-between gap-4 border-t border-[#dddb9d]/10 py-6 sm:flex-row">
           <p className="text-xs text-[#8e8c6c]">
-            © {new Date().getFullYear()} ArchiGen AI. Designed &amp; Built for Software Engineers.
+            © {new Date().getFullYear()} Arqen AI · Designed &amp; Built with ❤️ by{" "}
+            <span className="font-bold text-[#7bc963]">Aditya Vardhan</span>
           </p>
           <div className="flex items-center gap-2 rounded-full border border-[#7bc963]/20 bg-[#7bc963]/10 px-3 py-1 text-xs text-[#7bc963]">
             <span className="h-2 w-2 animate-pulse rounded-full bg-[#7bc963]" />
             <Sparkles className="h-3 w-3" />
-            <span>AI Architecture Engines Operational</span>
+            <span>Synthesis Engine Ready</span>
           </div>
         </div>
       </div>

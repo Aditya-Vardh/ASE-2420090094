@@ -40,7 +40,7 @@ export default function LandingHeader() {
           </div>
           <div className="flex flex-col">
             <span className="text-base font-bold tracking-tight text-[#f2f1da] group-hover:text-[#7bc963] transition-colors">
-              ArchiGen<span className="text-[#7bc963]">AI</span>
+              Arqen<span className="text-[#7bc963]">AI</span>
             </span>
             <span className="text-[9px] font-semibold tracking-widest uppercase text-[#8e8c6c] -mt-1">
               Architecture Engine

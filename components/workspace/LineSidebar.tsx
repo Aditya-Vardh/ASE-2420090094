@@ -78,7 +78,7 @@ export default function LineSidebar({ open, onClose }: Props) {
             </div>
             {!collapsed && (
               <div className="min-w-0">
-                <p className="truncate text-sm font-bold tracking-tight text-[#f2f1da]">ArchiGen AI</p>
+                <p className="truncate text-sm font-bold tracking-tight text-[#f2f1da]">Arqen AI</p>
                 <p className="text-[9px] font-semibold uppercase tracking-widest text-[#7bc963]">Studio Pro</p>
               </div>
             )}

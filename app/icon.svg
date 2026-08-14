@@ -1,21 +1,53 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="9" fill="#0a0b04"/>
-  <rect width="32" height="32" rx="9" fill="url(#bg-grad)" fill-opacity="0.18"/>
-  <rect x="0.5" y="0.5" width="31" height="31" rx="8.5" stroke="url(#border-grad)" stroke-width="1" stroke-opacity="0.4"/>
-  <path d="M16 6L24 10.5V19.5L16 24L8 19.5V10.5L16 6Z" fill="#12140a" stroke="#7bc963" stroke-width="1.5" stroke-linejoin="round"/>
-  <path d="M16 6V24M16 15L24 10.5M16 15L8 10.5" stroke="#7bc963" stroke-width="1.2" stroke-linejoin="round"/>
-  <circle cx="16" cy="6" r="1.5" fill="#dddb9d"/>
-  <circle cx="24" cy="10.5" r="1.5" fill="#7bc963"/>
-  <circle cx="8" cy="10.5" r="1.5" fill="#7bc963"/>
-  <circle cx="16" cy="24" r="1.5" fill="#dddb9d"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <rect width="100" height="100" rx="22" fill="#070804"/>
+  <rect width="100" height="100" rx="22" fill="url(#arqen-bg)" fill-opacity="0.15"/>
+  <rect x="1" y="1" width="98" height="98" rx="21" stroke="url(#arqen-stroke)" stroke-width="1.5" stroke-opacity="0.3"/>
+  <path d="M48 18L24 72H36L48 44L60 72H72L48 18Z" fill="url(#arqen-metal-1)"/>
+  <path d="M48 18L60 72H72L48 18Z" fill="url(#arqen-metal-2)"/>
+  <path d="M34 50H62V58H34V50Z" fill="url(#arqen-metal-3)"/>
+  <path d="M58 24L65 72H71L63 24H58Z" fill="url(#arqen-purple-1)"/>
+  <path d="M66 32L72 72H77L71 32H66Z" fill="url(#arqen-purple-2)"/>
+  <path d="M36 62C48 54 68 52 82 56C72 52 50 51 36 62Z" fill="url(#arqen-ray)"/>
+  <path d="M34 62C50 51 72 50 84 55" stroke="url(#arqen-ray-stroke)" stroke-width="2.5" stroke-linecap="round"/>
   <defs>
-    <linearGradient id="bg-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+    <linearGradient id="arqen-bg" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
       <stop stop-color="#7bc963"/>
       <stop offset="1" stop-color="#567f2b"/>
     </linearGradient>
-    <linearGradient id="border-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+    <linearGradient id="arqen-stroke" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
       <stop stop-color="#dddb9d"/>
       <stop offset="1" stop-color="#7bc963"/>
+    </linearGradient>
+    <linearGradient id="arqen-metal-1" x1="24" y1="18" x2="72" y2="72" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f2f1da"/>
+      <stop offset="0.5" stop-color="#c8c69d"/>
+      <stop offset="1" stop-color="#7bc963"/>
+    </linearGradient>
+    <linearGradient id="arqen-metal-2" x1="48" y1="18" x2="72" y2="72" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7bc963"/>
+      <stop offset="1" stop-color="#3d5a1f"/>
+    </linearGradient>
+    <linearGradient id="arqen-metal-3" x1="34" y1="50" x2="62" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#dddb9d"/>
+      <stop offset="1" stop-color="#7bc963"/>
+    </linearGradient>
+    <linearGradient id="arqen-purple-1" x1="58" y1="24" x2="71" y2="72" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#818cf8"/>
+      <stop offset="1" stop-color="#567f2b"/>
+    </linearGradient>
+    <linearGradient id="arqen-purple-2" x1="66" y1="32" x2="77" y2="72" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#a855f7"/>
+      <stop offset="1" stop-color="#7bc963"/>
+    </linearGradient>
+    <linearGradient id="arqen-ray" x1="36" y1="52" x2="82" y2="62" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#dddb9d"/>
+      <stop offset="0.5" stop-color="#7bc963"/>
+      <stop offset="1" stop-color="#818cf8"/>
+    </linearGradient>
+    <linearGradient id="arqen-ray-stroke" x1="34" y1="50" x2="84" y2="62" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#dddb9d"/>
+      <stop offset="0.5" stop-color="#7bc963"/>
+      <stop offset="1" stop-color="#c084fc"/>
     </linearGradient>
   </defs>
 </svg>

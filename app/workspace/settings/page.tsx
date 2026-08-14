@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Moon, Sun, Monitor, Settings } from "lucide-react";
+import { Check, Moon, Sun, Monitor, Settings, Key, ShieldCheck, Lock } from "lucide-react";
 import { getSettings, saveSettings } from "@/lib/storage/store";
 import { useTheme } from "@/components/ui/ThemeProvider";
 import type { AppSettings, DiagramType, ThemeMode } from "@/lib/storage/types";
 import { DEFAULT_SETTINGS, DIAGRAM_TYPE_LABELS } from "@/lib/storage/types";
 
-const SECTIONS = ["Appearance", "Architecture", "Generation", "About System"] as const;
+const SECTIONS = ["Appearance", "Architecture", "API & Privacy", "About System"] as const;
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
@@ -48,7 +48,7 @@ export default function SettingsPage() {
             Workspace Settings
           </h1>
           <p className="text-base text-[#c8c69d]">
-            Configure theme aesthetics, default diagram specs, auto-save, and AI behaviors.
+            Configure theme aesthetics, default diagram specs, in-browser privacy, and local storage.
           </p>
         </div>
 
@@ -134,18 +134,6 @@ export default function SettingsPage() {
                 ))}
               </select>
             </div>
-          </div>
-        </div>
-      )}
-
-      {section === "Generation" && (
-        <div className="relative overflow-hidden rounded-3xl border border-[#dddb9d]/15 bg-gradient-to-b from-[#12140a]/90 via-[#0d0f06]/95 to-[#0a0b04] p-7 backdrop-blur-2xl space-y-6">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#dddb9d_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.04]" />
-          <div className="relative z-10 space-y-6">
-            <div>
-              <h2 className="text-lg font-bold text-[#f2f1da] mb-1">AI Synthesis Preferences</h2>
-              <p className="text-xs text-[#c8c69d]">Control project auto-save and inspector pop-up behavior.</p>
-            </div>
 
             <div className="space-y-5 border-t border-[#dddb9d]/10 pt-5">
               <Toggle
@@ -156,10 +144,36 @@ export default function SettingsPage() {
               />
               <Toggle
                 label="Show Property Inspector by Default"
-                description="Open component inspector drawer automatically upon AI synthesis completion."
+                description="Open component inspector drawer automatically upon synthesis completion."
                 checked={settings.showExplanationByDefault}
                 onChange={(v) => update({ showExplanationByDefault: v })}
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {section === "API & Privacy" && (
+        <div className="relative overflow-hidden rounded-3xl border border-[#dddb9d]/15 bg-gradient-to-b from-[#12140a]/90 via-[#0d0f06]/95 to-[#0a0b04] p-7 backdrop-blur-2xl space-y-6">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#dddb9d_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.04]" />
+          <div className="relative z-10 space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#7bc963]/20 border border-[#7bc963]/30 text-[#7bc963]">
+                <ShieldCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-[#f2f1da]">Local Storage &amp; Privacy Guarantee</h2>
+                <p className="text-xs text-[#7bc963]">Zero Cloud Storage · 100% In-Browser Privacy</p>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[#dddb9d]/15 bg-[#070804] p-5 space-y-3 text-xs leading-relaxed text-[#c8c69d]">
+              <p>
+                <strong className="text-[#f2f1da]">In-Browser Storage:</strong> All system architecture diagrams, prompt history, and custom settings are stored exclusively inside your browser's local storage (`localStorage`).
+              </p>
+              <p>
+                <strong className="text-[#f2f1da]">API Keys &amp; Configuration:</strong> Optional API keys (`GROQ_API_KEY`, `OPENAI_API_KEY`) configured in `.env.local` or browser state stay local. If no cloud key is provided, ArchiGen AI uses the offline deterministic synthesis engine so generation works 100% reliably without requiring any remote login.
+              </p>
             </div>
           </div>
         </div>
@@ -170,16 +184,16 @@ export default function SettingsPage() {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#dddb9d_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.04]" />
           <div className="relative z-10 space-y-4">
             <div className="mb-4">
-              <h2 className="text-lg font-bold text-[#f2f1da]">ArchiGen AI Engine Specifications</h2>
-              <p className="text-xs text-[#c8c69d]">System architecture components and privacy guarantee.</p>
+              <h2 className="text-lg font-bold text-[#f2f1da]">ArchiGen AI Specifications</h2>
+              <p className="text-xs text-[#c8c69d]">System architecture components and software build info.</p>
             </div>
 
             <dl className="space-y-3 divide-y divide-[#dddb9d]/10 text-xs">
               <Row label="Core Product" value="ArchiGen AI Studio Pro v0.1" />
-              <Row label="AI Inference Engine" value="Groq / OpenAI API via Vercel AI SDK" />
-              <Row label="Storage Engine" value="Encrypted Browser Local Storage" />
-              <Row label="Diagram Renderer" value="Mermaid.js v11 SVG Canvas Engine" />
-              <Row label="Privacy Mode" value="100% Client-Side Local Project Storage" />
+              <Row label="AI Inference Engine" value="Groq / OpenAI API &amp; Offline Synthesizer" />
+              <Row label="Storage Engine" value="Encrypted In-Browser Local Storage" />
+              <Row label="Diagram Renderer" value="Mermaid.js v11 SVG Engine" />
+              <Row label="Privacy Mode" value="100% Local In-Browser Storage" />
             </dl>
           </div>
         </div>

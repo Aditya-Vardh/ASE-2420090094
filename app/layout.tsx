@@ -14,23 +14,25 @@ const geistMono = Geist_Mono({
 });
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://ase-2420090094.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "ArchiGen AI — Turn Ideas into UML Diagrams",
-    template: "%s | ArchiGen AI",
+    default: "Arqen AI — System Architecture & UML Synthesizer",
+    template: "%s | Arqen AI",
   },
   description:
-    "Describe your software idea in plain English and instantly generate a polished UML class diagram powered by AI. Export, refine, and iterate — no modeling tools required.",
+    "Turn natural language system descriptions into exportable UML diagrams, microservice maps, and structural specifications in seconds.",
   keywords: [
     "UML",
     "class diagram",
+    "sequence diagram",
     "software architecture",
-    "AI",
+    "system design",
     "Mermaid",
-    "Groq",
+    "AI synthesis",
+    "microservices",
   ],
   authors: [{ name: "ArchiGen AI" }],
   openGraph: {
@@ -38,23 +40,23 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: siteUrl,
     siteName: "ArchiGen AI",
-    title: "ArchiGen AI — Turn Ideas into UML Diagrams",
+    title: "ArchiGen AI — System Architecture & UML Synthesizer",
     description:
-      "Describe your software idea in plain English and instantly generate a polished UML class diagram powered by AI.",
+      "Turn natural language system descriptions into exportable UML diagrams, microservice maps, and structural specifications in seconds.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "ArchiGen AI — Turn Ideas into UML Diagrams",
+        alt: "ArchiGen AI — System Architecture & UML Synthesizer",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ArchiGen AI — Turn Ideas into UML Diagrams",
+    title: "ArchiGen AI — System Architecture & UML Synthesizer",
     description:
-      "Describe your software idea in plain English and instantly generate a polished UML class diagram powered by AI.",
+      "Turn natural language system descriptions into exportable UML diagrams, microservice maps, and structural specifications in seconds.",
     images: ["/og-image.png"],
   },
   icons: {

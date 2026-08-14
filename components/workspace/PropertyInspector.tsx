@@ -137,6 +137,25 @@ export default function PropertyInspector({
                   <MetricBar label="Maintainability" value={insights.maintainability} />
                   <MetricBar label="Security" value={insights.security} />
                 </ReflectiveCard>
+
+                {/* UML Diagram Specification Breakdown */}
+                <div className="rounded-2xl border border-[#dddb9d]/15 bg-[#070804] p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#7bc963]">UML Specification</span>
+                    <span className="rounded-full border border-[#7bc963]/30 bg-[#7bc963]/10 px-2.5 py-0.5 font-mono text-[10px] font-bold text-[#7bc963] uppercase">
+                      {result.diagramType}
+                    </span>
+                  </div>
+                  <p className="text-xs font-semibold text-[#f2f1da]">{explanation.components.length} Subsystem Components</p>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {technologies.map((tech) => (
+                      <span key={tech} className="rounded-md border border-[#dddb9d]/15 bg-[#12140a] px-2 py-0.5 font-mono text-[10px] text-[#c8c69d]">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
                 <p className="inspector-text">{explanation.overview}</p>
                 {explanation.technologyChoices && (
                   <div>

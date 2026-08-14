@@ -1,5 +1,4 @@
 import type { ArchitectureResult } from "@/lib/storage/types";
-
 import { sanitizeMermaid } from "@/lib/mermaid-repair";
 
 export { sanitizeMermaid };
@@ -72,83 +71,103 @@ export async function downloadText(content: string, filename: string, mime = "te
   URL.revokeObjectURL(url);
 }
 
+function sanitizeSvgForCanvas(svgContent: string): string {
+  // Strip external @import font declarations that taint HTMLCanvasElement
+  let clean = svgContent
+    .replace(/@import\s+url\([^)]+\);?/gi, "")
+    .replace(/@font-face\s*\{[^}]+\}/gi, "");
+
+  if (!clean.includes('xmlns="http://www.w3.org/2000/svg"')) {
+    clean = clean.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"');
+  }
+  return clean;
+}
+
 export async function svgToPng(svgContent: string, filename: string) {
+  const cleanSvg = sanitizeSvgForCanvas(svgContent);
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
-  if (!ctx) return;
 
   const img = new window.Image();
-  const svgBlob = new Blob([svgContent], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(svgBlob);
+  img.crossOrigin = "anonymous";
 
-  await new Promise<void>((resolve, reject) => {
+  const encoded = encodeURIComponent(cleanSvg)
+    .replace(/'/g, "%27")
+    .replace(/"/g, "%22");
+  const dataUri = `data:image/svg+xml;charset=utf-8,${encoded}`;
+
+  await new Promise<void>((resolve) => {
     img.onload = () => {
-      canvas.width = img.width * 2;
-      canvas.height = img.height * 2;
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          reject(new Error("PNG conversion failed"));
-          return;
+      try {
+        const width = img.width || 1200;
+        const height = img.height || 800;
+        canvas.width = width * 2;
+        canvas.height = height * 2;
+
+        if (ctx) {
+          ctx.fillStyle = "#0a0b04";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         }
-        const pngUrl = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = pngUrl;
-        link.download = filename;
-        link.click();
-        URL.revokeObjectURL(pngUrl);
+
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            downloadText(cleanSvg, filename.replace(/\.png$/i, ".svg"), "image/svg+xml");
+            resolve();
+            return;
+          }
+          const pngUrl = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = pngUrl;
+          link.download = filename;
+          link.click();
+          URL.revokeObjectURL(pngUrl);
+          resolve();
+        }, "image/png");
+      } catch (err) {
+        console.warn("Canvas export fallback to SVG download:", err);
+        downloadText(cleanSvg, filename.replace(/\.png$/i, ".svg"), "image/svg+xml");
         resolve();
-      }, "image/png");
-      URL.revokeObjectURL(url);
+      }
     };
-    img.onerror = reject;
-    img.src = url;
+
+    img.onerror = () => {
+      downloadText(cleanSvg, filename.replace(/\.png$/i, ".svg"), "image/svg+xml");
+      resolve();
+    };
+
+    img.src = dataUri;
   });
 }
 
 export async function svgToPdf(svgContent: string, filename: string) {
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
+  const cleanSvg = sanitizeSvgForCanvas(svgContent);
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    downloadText(cleanSvg, filename.replace(/\.pdf$/i, ".svg"), "image/svg+xml");
+    return;
+  }
 
-  const img = new window.Image();
-  const svgBlob = new Blob([svgContent], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(svgBlob);
-
-  await new Promise<void>((resolve, reject) => {
-    img.onload = () => {
-      canvas.width = img.width * 2;
-      canvas.height = img.height * 2;
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          reject(new Error("PDF export failed"));
-          return;
-        }
-        const printWindow = window.open("", "_blank");
-        if (!printWindow) {
-          reject(new Error("Popup blocked"));
-          return;
-        }
-        const imgUrl = URL.createObjectURL(blob);
-        printWindow.document.write(`
-          <html><head><title>${filename}</title></head>
-          <body style="margin:0;display:flex;justify-content:center;">
-            <img src="${imgUrl}" style="max-width:100%" onload="window.print();window.close();" />
-          </body></html>
-        `);
-        printWindow.document.close();
-        URL.revokeObjectURL(imgUrl);
-        resolve();
-      }, "image/png");
-      URL.revokeObjectURL(url);
-    };
-    img.onerror = reject;
-    img.src = url;
-  });
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>${filename}</title>
+        <style>
+          body { margin: 0; padding: 2rem; background: #0a0b04; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+          svg { max-width: 100%; height: auto; }
+        </style>
+      </head>
+      <body>
+        ${cleanSvg}
+        <script>
+          window.onload = function() {
+            window.print();
+            window.close();
+          };
+        </script>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
 }

@@ -12,13 +12,13 @@ type Node = {
 };
 
 const NODES: Node[] = [
-  { id: "user", label: "Client App", sub: "React / Next.js", color: "#22D3EE", y: 20 },
-  { id: "gateway", label: "API Gateway", sub: "Traefik / Kong", color: "#818CF8", y: 84 },
-  { id: "auth", label: "Auth & Identity", sub: "OAuth2 / JWT", color: "#F43F5E", y: 148 },
-  { id: "core", label: "Core Service", sub: "Node.js Microservice", color: "#A855F7", y: 212 },
-  { id: "db", label: "Primary DB", sub: "PostgreSQL 16", color: "#F59E0B", y: 276 },
-  { id: "cache", label: "Redis Cluster", sub: "Sub-ms Cache", color: "#10B981", y: 340 },
-  { id: "ai", label: "AI Engine", sub: "Groq / OpenAI API", color: "#EC4899", y: 404 },
+  { id: "user", label: "Client App", sub: "React / Next.js", color: "#7bc963", y: 20 },
+  { id: "gateway", label: "API Gateway", sub: "Traefik / Kong", color: "#dddb9d", y: 84 },
+  { id: "auth", label: "Auth & Identity", sub: "OAuth2 / JWT", color: "#f43f5e", y: 148 },
+  { id: "core", label: "Core Service", sub: "Node.js Microservice", color: "#7bc963", y: 212 },
+  { id: "db", label: "Primary DB", sub: "PostgreSQL 16", color: "#dddb9d", y: 276 },
+  { id: "cache", label: "Redis Cluster", sub: "Sub-ms Cache", color: "#567f2b", y: 340 },
+  { id: "ai", label: "AI Engine", sub: "Groq / OpenAI API", color: "#7bc963", y: 404 },
 ];
 
 const CX = 190;
@@ -45,12 +45,12 @@ export default function ArchitectureDemo() {
     D --> G[AI Engine]`;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#0A0C14]/90 p-1 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_40px_rgba(99,102,241,0.15)]">
+    <div className="relative overflow-hidden rounded-2xl border border-[#dddb9d]/20 bg-[#0a0b04]/90 p-1 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_40px_rgba(123,201,99,0.15)]">
       {/* Decorative gradient glowing bar */}
-      <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500" />
+      <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-[#dddb9d] via-[#7bc963] to-[#567f2b]" />
 
       {/* Header bar */}
-      <div className="flex items-center justify-between border-b border-white/[0.08] bg-[#0E101A] px-4 py-3">
+      <div className="flex items-center justify-between border-b border-[#dddb9d]/10 bg-[#0d0f06] px-4 py-3">
         <div className="flex items-center gap-2">
           <div className="flex gap-1.5">
             <span className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />

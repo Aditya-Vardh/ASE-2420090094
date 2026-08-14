@@ -103,11 +103,12 @@
   --color-warning: var(--warning);
   --color-error: var(--error);
   --color-info: var(--info);
-  --font-sans: 'Playwrite NG Modern', cursive, system-ui, sans-serif;
-  --font-heading: 'Playwrite NG Modern', cursive, system-ui, sans-serif;
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fade-in { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes fade-up { 0% { opacity: 0; transform: translateY(40px); } 100% { opacity: 1; transform: translateY(0); } }
 @keyframes fade-in-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes scale-in { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
 @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
@@ -116,7 +117,8 @@
 @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-8px); } }
 @keyframes border-glow { 0%, 100% { border-color: rgba(34,211,238,0.2); } 50% { border-color: rgba(34,211,238,0.5); } }
 
-.animate-fade-in { animation: fade-in 0.6s ease-out both; }
+.animate-fade-in { animation: fade-in 0.6s ease-out forwards; }
+.animate-fade-up { animation: fade-up 0.8s ease-out forwards; }
 .animate-fade-in-up { animation: fade-in-up 0.65s cubic-bezier(0.16,1,0.3,1) both; }
 .animate-scale-in { animation: scale-in 0.4s cubic-bezier(0.16,1,0.3,1) both; }
 .animate-float { animation: float 6s ease-in-out infinite; }
@@ -130,13 +132,9 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: 'Playwrite NG Modern', cursive, system-ui, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
@@ -166,7 +164,96 @@ textarea::placeholder, input::placeholder {
     #0a0b04;
 }
 
-/* ─── Landing Premium — Stats Strip ─── */
+/* ─── Workspace Page Shell / Layout Utilities ─── */
+.page-shell {
+  padding: 2rem 1.5rem;
+  padding-bottom: 4rem;
+}
+
+@media (min-width: 1024px) {
+  .page-shell { padding: 2.5rem 2.5rem 6rem; }
+}
+
+.page-header {
+  margin-bottom: 2.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(221, 219, 157, 0.14);
+}
+
+.page-header p:first-child {
+  margin-bottom: 0.5rem;
+}
+
+.page-header h1 {
+  font-size: 2.369rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--foreground);
+  line-height: 1.1;
+  margin-bottom: 0.625rem;
+}
+
+.page-header > p:last-child {
+  font-size: 1rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+  max-width: 42rem;
+}
+
+/* ─── Card Nav (filter/tab pills) ─── */
+.card-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.375rem;
+  border-radius: 1rem;
+  background: rgba(18, 20, 10, 0.8);
+  border: 1px solid rgba(221, 219, 157, 0.14);
+  backdrop-filter: blur(16px);
+}
+
+.card-nav-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  border-radius: 0.625rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  transition: color 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.card-nav-item:hover {
+  color: var(--foreground);
+  background: rgba(221, 219, 157, 0.08);
+}
+
+.card-nav-active {
+  color: var(--foreground) !important;
+  background: linear-gradient(135deg, rgba(221, 219, 157, 0.15), rgba(123, 201, 99, 0.12));
+  border-color: rgba(221, 219, 157, 0.28);
+  box-shadow: 0 0 20px rgba(123, 201, 99, 0.12);
+}
+
+.card-nav-label {
+  line-height: 1;
+}
+
+.card-nav-desc {
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: var(--text-subtle);
+}
+
+/* ─── Text color utilities ─── */
+.text-subtle { color: var(--text-subtle); }
+.text-muted-custom { color: var(--text-muted); }
+
+
 .stats-strip {
   display: flex;
   align-items: center;

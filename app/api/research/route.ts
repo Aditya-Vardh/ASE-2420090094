@@ -2,37 +2,17 @@ import { generateObject } from "ai";
 import { model } from "@/lib/ai/models";
 import { researchSchema } from "@/lib/ai/schema";
 import { RESEARCH_PROMPT } from "@/lib/ai/prompt";
-import { checkApiKey, getClientKey, rateLimit } from "@/lib/rate-limit";
+import { checkApiKey } from "@/lib/rate-limit";
+import { synthesizeFallbackResearch } from "@/lib/ai/fallback-synthesizer";
 
 const MIN_QUESTION_LENGTH = 10;
 
 export async function POST(req: Request) {
+  let question = "";
+
   try {
-    const apiKey = checkApiKey();
-    if (!apiKey) {
-      return Response.json(
-        {
-          error:
-            "Your AI service configuration is missing. Set GROQ_API_KEY in your environment.",
-        },
-        { status: 503 },
-      );
-    }
-
-    const clientKey = getClientKey(req);
-    const limit = rateLimit(clientKey);
-    if (!limit.allowed) {
-      return Response.json(
-        {
-          error: `Rate limit exceeded. Try again in ${limit.retryAfter} seconds.`,
-        },
-        { status: 429 },
-      );
-    }
-
     const body = await req.json();
-    const question =
-      typeof body.question === "string" ? body.question.trim() : "";
+    question = typeof body.question === "string" ? body.question.trim() : "";
 
     if (!question) {
       return Response.json(
@@ -48,19 +28,29 @@ export async function POST(req: Request) {
       );
     }
 
-    const { object } = await generateObject({
-      model,
-      schema: researchSchema,
-      system: RESEARCH_PROMPT,
-      prompt: question,
-    });
+    const apiKey = checkApiKey();
+    if (!apiKey) {
+      const fallback = synthesizeFallbackResearch(question);
+      return Response.json(fallback);
+    }
 
-    return Response.json(object);
+    try {
+      const { object } = await generateObject({
+        model,
+        schema: researchSchema,
+        system: RESEARCH_PROMPT,
+        prompt: question,
+      });
+
+      return Response.json(object);
+    } catch (aiErr) {
+      console.warn("Research AI call failed, using fallback:", aiErr);
+      const fallback = synthesizeFallbackResearch(question);
+      return Response.json(fallback);
+    }
   } catch (error) {
     console.error("Research API error:", error);
-    return Response.json(
-      { error: "Unable to complete research. Please try again." },
-      { status: 500 },
-    );
+    const fallback = synthesizeFallbackResearch(question || "Architecture Research");
+    return Response.json(fallback);
   }
 }

@@ -37,19 +37,19 @@ export default function HistoryPage() {
   }, [history, query, filter, sort]);
 
   return (
-    <div className="mx-auto max-w-5xl p-6 lg:p-10 space-y-8">
+    <div className="mx-auto max-w-5xl p-6 lg:p-10 pt-8 sm:pt-12 pb-16 space-y-8">
       {/* Header */}
-      <div className="border-b border-white/[0.08] pb-6">
-        <div className="mb-2.5 inline-flex items-center gap-2 rounded-full border border-purple-400/30 bg-purple-400/10 px-3.5 py-1 backdrop-blur-md">
-          <History className="h-3.5 w-3.5 text-purple-400" />
-          <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-purple-300">
+      <div className="border-b border-[#dddb9d]/15 pb-6">
+        <div className="mb-2.5 inline-flex items-center gap-2 rounded-full border border-[#7bc963]/30 bg-[#7bc963]/10 px-3.5 py-1 backdrop-blur-md">
+          <History className="h-3.5 w-3.5 text-[#7bc963]" />
+          <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[#7bc963]">
             Generation Activity Timeline
           </span>
         </div>
-        <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+        <h1 className="text-4xl font-extrabold tracking-tight text-[#f2f1da] sm:text-5xl">
           Generation History Log
         </h1>
-        <p className="mt-2 text-base text-slate-300 max-w-xl">
+        <p className="mt-2 text-base text-[#c8c69d] max-w-xl">
           Review previous AI synthesis requests, prompt iterations, and historical diagrams.
         </p>
       </div>
@@ -57,76 +57,78 @@ export default function HistoryPage() {
       {/* Controls Bar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8e8c6c]" />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search prompt, project title, or diagram format…"
-            className="w-full rounded-2xl border border-white/10 bg-[#0A0C14] px-4 py-3 pl-11 text-xs text-white placeholder-slate-400 outline-none focus:border-purple-400/50"
+            className="w-full rounded-2xl border border-[#dddb9d]/20 bg-[#070804] px-4 py-3 pl-11 text-xs font-medium text-[#f2f1da] placeholder-[#8e8c6c] outline-none focus:border-[#7bc963]"
           />
         </div>
         <div className="flex gap-3">
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as typeof filter)}
-            className="rounded-2xl border border-white/10 bg-[#0A0C14] px-4 py-3 text-xs font-semibold text-slate-300 outline-none focus:border-purple-400/50"
+            className="rounded-2xl border border-[#dddb9d]/20 bg-[#070804] px-4 py-3 text-xs font-bold text-[#f2f1da] outline-none focus:border-[#7bc963]"
           >
-            <option value="all">All Status</option>
-            <option value="success">Success Only</option>
-            <option value="error">Error Only</option>
+            <option value="all" className="bg-[#12140a]">All Status</option>
+            <option value="success" className="bg-[#12140a]">Success Only</option>
+            <option value="error" className="bg-[#12140a]">Error Only</option>
           </select>
 
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as typeof sort)}
-            className="rounded-2xl border border-white/10 bg-[#0A0C14] px-4 py-3 text-xs font-semibold text-slate-300 outline-none focus:border-purple-400/50"
+            className="rounded-2xl border border-[#dddb9d]/20 bg-[#070804] px-4 py-3 text-xs font-bold text-[#f2f1da] outline-none focus:border-[#7bc963]"
           >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
+            <option value="newest" className="bg-[#12140a]">Newest First</option>
+            <option value="oldest" className="bg-[#12140a]">Oldest First</option>
           </select>
         </div>
       </div>
 
       {/* List / Empty State */}
       {filtered.length === 0 ? (
-        <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-dashed border-white/10 bg-[#0A0C14]/60 p-10 text-center backdrop-blur-2xl">
-          <History className="h-10 w-10 text-purple-400/60 mb-3" />
-          <h3 className="text-lg font-bold text-white">No Matching History Entries</h3>
-          <p className="mt-1 text-xs text-slate-400">Try clearing search filters or generate a new architecture.</p>
+        <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-dashed border-[#dddb9d]/20 bg-[#12140a]/60 p-10 text-center backdrop-blur-2xl">
+          <History className="h-10 w-10 text-[#7bc963]/60 mb-3" />
+          <h3 className="text-lg font-bold text-[#f2f1da]">No Matching History Entries</h3>
+          <p className="mt-1 text-xs text-[#c8c69d]">Try clearing search filters or generate a new architecture.</p>
         </div>
       ) : (
         <div className="relative space-y-4">
           {filtered.map((entry) => (
             <div
               key={entry.id}
-              className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0A0C14]/90 p-5 backdrop-blur-2xl transition-all hover:border-white/20 hover:bg-white/[0.03]"
+              className="group relative overflow-hidden rounded-2xl border border-[#dddb9d]/15 bg-gradient-to-b from-[#12140a]/90 via-[#0d0f06]/95 to-[#0a0b04] p-5 backdrop-blur-2xl transition-all hover:border-[#dddb9d]/35"
             >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#dddb9d_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.04]" />
+              
+              <div className="relative z-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                    <h3 className="text-base font-bold text-white group-hover:text-purple-300 transition-colors">
+                    <h3 className="text-base font-bold text-[#f2f1da] group-hover:text-[#7bc963] transition-colors">
                       {entry.projectTitle}
                     </h3>
                     <span
                       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase ${
                         entry.status === "success"
-                          ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
+                          ? "bg-[#7bc963]/10 border border-[#7bc963]/30 text-[#7bc963]"
                           : "bg-rose-500/10 border border-rose-500/30 text-rose-400"
                       }`}
                     >
                       {entry.status === "success" ? <CheckCircle2 className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
                       {entry.status}
                     </span>
-                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 font-mono text-[10px] text-slate-400 uppercase">
+                    <span className="rounded-full border border-[#dddb9d]/20 bg-[#dddb9d]/10 px-2.5 py-0.5 font-mono text-[10px] text-[#dddb9d] uppercase font-bold">
                       {DIAGRAM_TYPE_LABELS[entry.diagramType]}
                     </span>
                   </div>
 
-                  <p className="text-xs leading-relaxed text-slate-300 line-clamp-2">
+                  <p className="text-xs leading-relaxed text-[#c8c69d] line-clamp-2">
                     {entry.prompt}
                   </p>
-                  <p className="mt-2 text-[10px] font-mono text-slate-400">
+                  <p className="mt-2 text-[10px] font-mono text-[#8e8c6c]">
                     {new Date(entry.createdAt).toLocaleString()}
                   </p>
                 </div>
@@ -135,7 +137,7 @@ export default function HistoryPage() {
                   <Link
                     href={`/workspace/generate?project=${entry.projectId}`}
                     onClick={() => setActiveProjectId(entry.projectId)}
-                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-bold text-cyan-400 hover:bg-cyan-400 hover:text-slate-950 transition-all"
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-[#dddb9d]/20 bg-[#dddb9d]/10 px-4 py-2 text-xs font-bold text-[#7bc963] hover:bg-[#7bc963] hover:text-[#0a0b04] transition-all"
                   >
                     Open Canvas <ArrowRight className="h-3.5 w-3.5" />
                   </Link>

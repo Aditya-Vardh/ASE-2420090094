@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Moon, Sun, Monitor, Settings, Sparkles, Shield, Cpu } from "lucide-react";
+import { Check, Moon, Sun, Monitor, Settings } from "lucide-react";
 import { getSettings, saveSettings } from "@/lib/storage/store";
 import { useTheme } from "@/components/ui/ThemeProvider";
 import type { AppSettings, DiagramType, ThemeMode } from "@/lib/storage/types";
@@ -34,33 +34,33 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl p-6 lg:p-10 space-y-8">
+    <div className="mx-auto max-w-4xl p-6 lg:p-10 pt-8 sm:pt-12 pb-16 space-y-8">
       {/* Header */}
-      <div className="flex items-start justify-between border-b border-white/[0.08] pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-[#dddb9d]/15 pb-6">
         <div>
-          <div className="mb-2.5 inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3.5 py-1 backdrop-blur-md">
-            <Settings className="h-3.5 w-3.5 text-cyan-400" />
-            <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-cyan-300">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#7bc963]/30 bg-[#7bc963]/10 px-3.5 py-1 backdrop-blur-md">
+            <Settings className="h-3.5 w-3.5 text-[#7bc963]" />
+            <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[#7bc963]">
               System Configuration
             </span>
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+          <h1 className="text-4xl font-extrabold tracking-tight text-[#f2f1da] sm:text-5xl leading-tight mb-2">
             Workspace Settings
           </h1>
-          <p className="mt-2 text-base text-slate-300">
+          <p className="text-base text-[#c8c69d]">
             Configure theme aesthetics, default diagram specs, auto-save, and AI behaviors.
           </p>
         </div>
 
         {saved && (
-          <span className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-xs font-bold text-emerald-400">
+          <span className="flex items-center gap-1.5 rounded-full border border-[#7bc963]/30 bg-[#7bc963]/10 px-3.5 py-1.5 font-mono text-xs font-bold text-[#7bc963] shrink-0">
             <Check className="h-3.5 w-3.5" /> Preferences Saved
           </span>
         )}
       </div>
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2 rounded-2xl border border-white/10 bg-[#0A0C14] p-1.5">
+      <div className="flex flex-wrap gap-2 rounded-2xl border border-[#dddb9d]/20 bg-[#12140a] p-1.5">
         {SECTIONS.map((s) => (
           <button
             key={s}
@@ -68,8 +68,8 @@ export default function SettingsPage() {
             onClick={() => setSection(s)}
             className={`rounded-xl px-5 py-2.5 text-xs font-bold transition-all ${
               section === s
-                ? "bg-gradient-to-r from-cyan-400 to-indigo-500 text-slate-950 shadow-[0_0_20px_rgba(34,211,238,0.3)]"
-                : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
+                ? "bg-[#7bc963] text-[#0a0b04] shadow-[0_0_20px_rgba(123,201,99,0.3)]"
+                : "text-[#c8c69d] hover:text-[#f2f1da] hover:bg-[#dddb9d]/10"
             }`}
           >
             {s}
@@ -79,99 +79,109 @@ export default function SettingsPage() {
 
       {/* Tab Panels */}
       {section === "Appearance" && (
-        <div className="rounded-3xl border border-white/[0.08] bg-[#0A0C14]/90 p-7 backdrop-blur-2xl space-y-6">
-          <div>
-            <h2 className="text-lg font-bold text-white mb-1">Theme Aesthetic</h2>
-            <p className="text-xs text-slate-400">Select interface appearance and accent lighting.</p>
-          </div>
+        <div className="relative overflow-hidden rounded-3xl border border-[#dddb9d]/15 bg-gradient-to-b from-[#12140a]/90 via-[#0d0f06]/95 to-[#0a0b04] p-7 backdrop-blur-2xl space-y-6">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#dddb9d_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.04]" />
+          <div className="relative z-10">
+            <h2 className="text-lg font-bold text-[#f2f1da] mb-1">Theme Aesthetic</h2>
+            <p className="text-xs text-[#c8c69d]">Select interface appearance and accent lighting.</p>
 
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { mode: "dark" as ThemeMode, icon: Moon, label: "Dark Midnight" },
-              { mode: "light" as ThemeMode, icon: Sun, label: "Light Mode" },
-              { mode: "system" as ThemeMode, icon: Monitor, label: "System Sync" },
-            ].map(({ mode, icon: Icon, label }) => (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => setThemeMode(mode)}
-                className={`flex flex-col items-center justify-center gap-3 rounded-2xl border p-6 text-xs font-bold transition-all ${
-                  theme === mode
-                    ? "border-cyan-400/60 bg-cyan-400/10 text-cyan-300 shadow-[0_0_25px_rgba(34,211,238,0.2)]"
-                    : "border-white/10 bg-[#07080F] text-slate-400 hover:border-white/20 hover:text-white"
-                }`}
-              >
-                <Icon className="h-6 w-6" />
-                {label}
-              </button>
-            ))}
+            <div className="grid grid-cols-3 gap-4 mt-6">
+              {[
+                { mode: "dark" as ThemeMode, icon: Moon, label: "Dark Midnight" },
+                { mode: "light" as ThemeMode, icon: Sun, label: "Light Mode" },
+                { mode: "system" as ThemeMode, icon: Monitor, label: "System Sync" },
+              ].map(({ mode, icon: Icon, label }) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setThemeMode(mode)}
+                  className={`flex flex-col items-center justify-center gap-3 rounded-2xl border p-6 text-xs font-bold transition-all ${
+                    theme === mode
+                      ? "border-[#7bc963] bg-[#7bc963]/10 text-[#7bc963] shadow-[0_0_25px_rgba(123,201,99,0.2)]"
+                      : "border-[#dddb9d]/15 bg-[#070804] text-[#c8c69d] hover:border-[#dddb9d]/30 hover:text-[#f2f1da]"
+                  }`}
+                >
+                  <Icon className="h-6 w-6" />
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
       {section === "Architecture" && (
-        <div className="rounded-3xl border border-white/[0.08] bg-[#0A0C14]/90 p-7 backdrop-blur-2xl space-y-6">
-          <div>
-            <h2 className="text-lg font-bold text-white mb-1">Diagram Specification Defaults</h2>
-            <p className="text-xs text-slate-400">Choose the default UML diagram type when launching new projects.</p>
-          </div>
+        <div className="relative overflow-hidden rounded-3xl border border-[#dddb9d]/15 bg-gradient-to-b from-[#12140a]/90 via-[#0d0f06]/95 to-[#0a0b04] p-7 backdrop-blur-2xl space-y-6">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#dddb9d_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.04]" />
+          <div className="relative z-10 space-y-6">
+            <div>
+              <h2 className="text-lg font-bold text-[#f2f1da] mb-1">Diagram Specification Defaults</h2>
+              <p className="text-xs text-[#c8c69d]">Choose the default UML diagram type when launching new projects.</p>
+            </div>
 
-          <div>
-            <label htmlFor="default-diagram" className="mb-2 block text-xs font-mono uppercase tracking-wider text-slate-400">
-              Default Diagram Type
-            </label>
-            <select
-              id="default-diagram"
-              value={settings.defaultDiagramType}
-              onChange={(e) => update({ defaultDiagramType: e.target.value as DiagramType })}
-              className="w-full rounded-2xl border border-white/10 bg-[#07080F] px-4 py-3 text-xs font-semibold text-white outline-none focus:border-cyan-400/50"
-            >
-              {Object.entries(DIAGRAM_TYPE_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
-            </select>
+            <div>
+              <label htmlFor="default-diagram" className="mb-2 block text-xs font-mono uppercase tracking-wider text-[#8e8c6c]">
+                Default Diagram Type
+              </label>
+              <select
+                id="default-diagram"
+                value={settings.defaultDiagramType}
+                onChange={(e) => update({ defaultDiagramType: e.target.value as DiagramType })}
+                className="w-full rounded-2xl border border-[#dddb9d]/20 bg-[#070804] px-4 py-3 text-xs font-bold text-[#f2f1da] outline-none focus:border-[#7bc963]"
+              >
+                {Object.entries(DIAGRAM_TYPE_LABELS).map(([value, label]) => (
+                  <option key={value} value={value} className="bg-[#12140a]">{label}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       )}
 
       {section === "Generation" && (
-        <div className="rounded-3xl border border-white/[0.08] bg-[#0A0C14]/90 p-7 backdrop-blur-2xl space-y-6">
-          <div>
-            <h2 className="text-lg font-bold text-white mb-1">AI Synthesis Preferences</h2>
-            <p className="text-xs text-slate-400">Control project auto-save and inspector pop-up behavior.</p>
-          </div>
+        <div className="relative overflow-hidden rounded-3xl border border-[#dddb9d]/15 bg-gradient-to-b from-[#12140a]/90 via-[#0d0f06]/95 to-[#0a0b04] p-7 backdrop-blur-2xl space-y-6">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#dddb9d_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.04]" />
+          <div className="relative z-10 space-y-6">
+            <div>
+              <h2 className="text-lg font-bold text-[#f2f1da] mb-1">AI Synthesis Preferences</h2>
+              <p className="text-xs text-[#c8c69d]">Control project auto-save and inspector pop-up behavior.</p>
+            </div>
 
-          <div className="space-y-5 border-t border-white/[0.08] pt-5">
-            <Toggle
-              label="Auto-Save Architecture Projects"
-              description="Automatically commit changes and generated diagrams to local storage."
-              checked={settings.autoSaveProjects}
-              onChange={(v) => update({ autoSaveProjects: v })}
-            />
-            <Toggle
-              label="Show Property Inspector by Default"
-              description="Open component inspector drawer automatically upon AI synthesis completion."
-              checked={settings.showExplanationByDefault}
-              onChange={(v) => update({ showExplanationByDefault: v })}
-            />
+            <div className="space-y-5 border-t border-[#dddb9d]/10 pt-5">
+              <Toggle
+                label="Auto-Save Architecture Projects"
+                description="Automatically commit changes and generated diagrams to local storage."
+                checked={settings.autoSaveProjects}
+                onChange={(v) => update({ autoSaveProjects: v })}
+              />
+              <Toggle
+                label="Show Property Inspector by Default"
+                description="Open component inspector drawer automatically upon AI synthesis completion."
+                checked={settings.showExplanationByDefault}
+                onChange={(v) => update({ showExplanationByDefault: v })}
+              />
+            </div>
           </div>
         </div>
       )}
 
       {section === "About System" && (
-        <div className="rounded-3xl border border-white/[0.08] bg-[#0A0C14]/90 p-7 backdrop-blur-2xl space-y-4">
-          <div className="mb-4">
-            <h2 className="text-lg font-bold text-white">ArchiGen AI Engine Specifications</h2>
-            <p className="text-xs text-slate-400">System architecture components and privacy guarantee.</p>
-          </div>
+        <div className="relative overflow-hidden rounded-3xl border border-[#dddb9d]/15 bg-gradient-to-b from-[#12140a]/90 via-[#0d0f06]/95 to-[#0a0b04] p-7 backdrop-blur-2xl space-y-4">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(#dddb9d_1px,transparent_1px)] [background-size:20px_20px] opacity-[0.04]" />
+          <div className="relative z-10 space-y-4">
+            <div className="mb-4">
+              <h2 className="text-lg font-bold text-[#f2f1da]">ArchiGen AI Engine Specifications</h2>
+              <p className="text-xs text-[#c8c69d]">System architecture components and privacy guarantee.</p>
+            </div>
 
-          <dl className="space-y-3 divide-y divide-white/[0.08] text-xs">
-            <Row label="Core Product" value="ArchiGen AI Studio Pro v0.1" />
-            <Row label="AI Inference Engine" value="Groq / OpenAI API via Vercel AI SDK" />
-            <Row label="Storage Engine" value="Encrypted Browser Local Storage" />
-            <Row label="Diagram Renderer" value="Mermaid.js v11 SVG Canvas Engine" />
-            <Row label="Privacy Mode" value="100% Client-Side Local Project Storage" />
-          </dl>
+            <dl className="space-y-3 divide-y divide-[#dddb9d]/10 text-xs">
+              <Row label="Core Product" value="ArchiGen AI Studio Pro v0.1" />
+              <Row label="AI Inference Engine" value="Groq / OpenAI API via Vercel AI SDK" />
+              <Row label="Storage Engine" value="Encrypted Browser Local Storage" />
+              <Row label="Diagram Renderer" value="Mermaid.js v11 SVG Canvas Engine" />
+              <Row label="Privacy Mode" value="100% Client-Side Local Project Storage" />
+            </dl>
+          </div>
         </div>
       )}
     </div>
@@ -181,8 +191,8 @@ export default function SettingsPage() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between pt-3">
-      <dt className="text-slate-400">{label}</dt>
-      <dd className="font-mono font-semibold text-cyan-300">{value}</dd>
+      <dt className="text-[#8e8c6c] font-medium">{label}</dt>
+      <dd className="font-mono font-bold text-[#7bc963]">{value}</dd>
     </div>
   );
 }
@@ -191,17 +201,17 @@ function Toggle({ label, description, checked, onChange }: { label: string; desc
   return (
     <label className="flex cursor-pointer items-center justify-between gap-4">
       <div>
-        <p className="text-sm font-bold text-white">{label}</p>
-        <p className="text-xs text-slate-400">{description}</p>
+        <p className="text-sm font-bold text-[#f2f1da]">{label}</p>
+        <p className="text-xs text-[#c8c69d]">{description}</p>
       </div>
       <button
         type="button"
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${checked ? "bg-cyan-400" : "bg-white/10"}`}
+        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${checked ? "bg-[#7bc963]" : "bg-[#dddb9d]/20"}`}
       >
-        <span className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-slate-950 transition-transform ${checked ? "translate-x-5" : ""}`} />
+        <span className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-[#0a0b04] transition-transform ${checked ? "translate-x-5" : ""}`} />
       </button>
     </label>
   );

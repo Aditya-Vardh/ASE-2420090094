@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Sparkles, ShieldCheck } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 const githubUrl = process.env.NEXT_PUBLIC_GITHUB_URL ?? "https://github.com";
 
@@ -38,31 +38,31 @@ const FOOTER_LINKS = [
 
 export default function LandingFooter() {
   return (
-    <footer className="border-t border-white/[0.08] bg-[#05060A]/90 backdrop-blur-2xl">
+    <footer className="border-t border-[#dddb9d]/10 bg-[#050603]/90 backdrop-blur-2xl">
       <div className="mx-auto max-w-6xl px-4 sm:px-8">
         {/* Main Grid */}
         <div className="grid gap-12 py-16 sm:grid-cols-2 lg:grid-cols-5">
           {/* Brand Column */}
           <div className="sm:col-span-2">
             <Link href="/" className="group mb-4 inline-flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-400 p-[1px] shadow-[0_0_20px_rgba(99,102,241,0.3)]">
-                <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-[#090A10]">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#dddb9d] via-[#7bc963] to-[#567f2b] p-[1px] shadow-[0_0_20px_rgba(123,201,99,0.3)]">
+                <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-[#0a0b04]">
                   <Image src="/icon.svg" alt="ArchiGen Logo" width={22} height={22} className="rounded-md" aria-hidden />
                 </div>
               </div>
               <div className="flex flex-col">
-                <span className="text-base font-bold tracking-tight text-white group-hover:text-cyan-300 transition-colors">
-                  ArchiGen<span className="bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">AI</span>
+                <span className="text-base font-bold tracking-tight text-[#f2f1da] group-hover:text-[#7bc963] transition-colors">
+                  ArchiGen<span className="text-[#7bc963]">AI</span>
                 </span>
-                <span className="text-[9px] font-semibold tracking-widest uppercase text-slate-400 -mt-1">
+                <span className="text-[9px] font-semibold tracking-widest uppercase text-[#8e8c6c] -mt-1">
                   Architecture Engine
                 </span>
               </div>
             </Link>
 
-            <p className="mt-3 max-w-xs text-sm leading-relaxed text-slate-400">
-              Transform system concepts into production software diagrams, UML schemas, 
-              and architectural insights powered by Groq & OpenAI.
+            <p className="mt-3 max-w-xs text-sm leading-relaxed text-[#8e8c6c]">
+              Transform system concepts into production software diagrams, UML schemas,
+              and architectural insights powered by Groq &amp; OpenAI.
             </p>
 
             <div className="mt-6 flex items-center gap-3">
@@ -70,7 +70,7 @@ export default function LandingFooter() {
                 href={githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-slate-400 transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#dddb9d]/15 bg-[#12140a] text-[#8e8c6c] transition-all hover:border-[#dddb9d]/35 hover:bg-[#1a1d0e] hover:text-[#f2f1da]"
                 aria-label="GitHub Repository"
               >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -83,7 +83,7 @@ export default function LandingFooter() {
           {/* Links Columns */}
           {FOOTER_LINKS.map((col) => (
             <div key={col.title}>
-              <p className="mb-4 font-mono text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+              <p className="mb-4 font-mono text-[11px] font-semibold uppercase tracking-wider text-[#8e8c6c]">
                 {col.title}
               </p>
               <ul className="space-y-2.5 text-xs">
@@ -94,14 +94,14 @@ export default function LandingFooter() {
                         href={item.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-slate-400 transition-colors hover:text-cyan-300"
+                        className="text-[#8e8c6c] transition-colors hover:text-[#7bc963]"
                       >
                         {item.label}
                       </a>
                     ) : (
                       <Link
                         href={item.href}
-                        className="text-slate-400 transition-colors hover:text-cyan-300"
+                        className="text-[#8e8c6c] transition-colors hover:text-[#7bc963]"
                       >
                         {item.label}
                       </Link>
@@ -114,12 +114,13 @@ export default function LandingFooter() {
         </div>
 
         {/* Bottom Status Bar */}
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-white/[0.08] py-6 sm:flex-row">
-          <p className="text-xs text-slate-400">
-            © {new Date().getFullYear()} ArchiGen AI. Designed & Built for Software Engineers.
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-[#dddb9d]/10 py-6 sm:flex-row">
+          <p className="text-xs text-[#8e8c6c]">
+            © {new Date().getFullYear()} ArchiGen AI. Designed &amp; Built for Software Engineers.
           </p>
-          <div className="flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-400">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
+          <div className="flex items-center gap-2 rounded-full border border-[#7bc963]/20 bg-[#7bc963]/10 px-3 py-1 text-xs text-[#7bc963]">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-[#7bc963]" />
+            <Sparkles className="h-3 w-3" />
             <span>AI Architecture Engines Operational</span>
           </div>
         </div>

@@ -17,46 +17,46 @@ export default function WorkspaceHeader({
   title, onTitleChange, diagramType, saved, onExport, onFullscreen,
 }: Props) {
   return (
-    <header className="flex h-14 items-center justify-between border-b border-white/[0.08] bg-[#070810]/90 px-4 sm:px-6 backdrop-blur-2xl">
+    <header className="flex h-14 shrink-0 items-center justify-between border-b border-[#dddb9d]/15 bg-[#0a0b04]/90 px-4 sm:px-6 backdrop-blur-2xl z-20">
       {/* Left Title Input */}
       <div className="flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-400/30 text-cyan-400">
+        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#dddb9d]/10 border border-[#dddb9d]/30 text-[#7bc963]">
           <Layers className="h-4 w-4" />
         </div>
         <input
           type="text"
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
-          className="rounded-xl border border-transparent bg-transparent px-2.5 py-1 text-sm font-bold text-white transition-colors hover:border-white/10 focus:border-cyan-400/50 focus:bg-[#0A0C14] outline-none"
+          className="rounded-xl border border-transparent bg-transparent px-2.5 py-1 text-sm font-bold text-[#f2f1da] transition-colors hover:border-[#dddb9d]/20 focus:border-[#7bc963] focus:bg-[#12140a] outline-none"
           aria-label="Project name"
         />
         {saved && (
-          <span className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
+          <span className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase text-[#7bc963] bg-[#7bc963]/10 border border-[#7bc963]/30 px-2.5 py-0.5 rounded-full">
             <Check className="h-3 w-3" /> Auto-Saved
           </span>
         )}
       </div>
 
       {/* Center Studio Pill */}
-      <div className="hidden md:flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1 text-xs text-slate-300">
-        <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+      <div className="hidden md:flex items-center gap-2 rounded-full border border-[#dddb9d]/15 bg-[#12140a] px-3.5 py-1 text-xs text-[#c8c69d]">
+        <Sparkles className="h-3.5 w-3.5 text-[#7bc963]" />
         <span>ArchiGen AI Studio Canvas</span>
       </div>
 
       {/* Right Controls */}
       <div className="flex items-center gap-2.5">
-        <span className="rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3 py-1 font-mono text-[10px] font-bold uppercase text-indigo-300">
+        <span className="rounded-full border border-[#dddb9d]/30 bg-[#dddb9d]/10 px-3 py-1 font-mono text-[10px] font-bold uppercase text-[#dddb9d]">
           {DIAGRAM_TYPE_LABELS[diagramType]}
         </span>
 
         {onExport && (
           <button
             type="button"
-            className="flex h-8 items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-xs font-semibold text-slate-200 hover:bg-white/[0.08] hover:text-white transition-colors"
+            className="flex h-8 items-center gap-1.5 rounded-xl border border-[#dddb9d]/20 bg-[#12140a] px-3 text-xs font-bold text-[#f2f1da] hover:bg-[#dddb9d]/10 hover:text-white transition-colors"
             title="Export Markdown Documentation"
             onClick={onExport}
           >
-            <Download className="h-3.5 w-3.5 text-cyan-400" />
+            <Download className="h-3.5 w-3.5 text-[#7bc963]" />
             <span>Export MD</span>
           </button>
         )}
@@ -64,7 +64,7 @@ export default function WorkspaceHeader({
         {onFullscreen && (
           <button
             type="button"
-            className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-slate-300 hover:bg-white/[0.08] hover:text-white transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#dddb9d]/20 bg-[#12140a] text-[#c8c69d] hover:bg-[#dddb9d]/10 hover:text-[#f2f1da] transition-colors"
             title="Fullscreen Diagram"
             onClick={onFullscreen}
           >

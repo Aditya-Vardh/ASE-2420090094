@@ -9,7 +9,6 @@ import type { ArchitectureResult } from "@/lib/storage/types";
 import type { ArchitectureGraph } from "@/lib/graph/types";
 import { evaluateUnifiedIntelligence } from "@/lib/intelligence/engine";
 import { analyzeComponentFailurePath } from "@/lib/intelligence/failure";
-import type { FailurePathResult } from "@/lib/intelligence/types";
 
 type Tab = "overview" | "security" | "reliability" | "failure" | "observability" | "patterns" | "cost" | "recommendations";
 
@@ -58,7 +57,7 @@ export default function PropertyInspector({
 }: Props) {
   const [tab, setTab] = useState<Tab>("overview");
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [selectedFailureNode, setSelectedFailureNode] = useState<string | null>(null);
+  const [selectedFailureNodeId, setSelectedFailureNodeId] = useState<string>("");
 
   if (!result || !graph) {
     return (
@@ -77,8 +76,9 @@ export default function PropertyInspector({
   }
 
   const unifiedIntel = evaluateUnifiedIntelligence(graph);
-  const failurePathResult: FailurePathResult | null = selectedFailureNode || selectedComponent
-    ? analyzeComponentFailurePath(graph, selectedFailureNode || selectedComponent!)
+  const effectiveFailureId = selectedFailureNodeId || graph.nodes[0]?.id || "";
+  const failurePathResult = effectiveFailureId
+    ? analyzeComponentFailurePath(graph, effectiveFailureId)
     : null;
 
   const component = selectedComponent
@@ -169,7 +169,8 @@ export default function PropertyInspector({
                 <button
                   type="button"
                   onClick={() => {
-                    setSelectedFailureNode(component.name);
+                    const match = graph.nodes.find((n) => n.name === component.name);
+                    setSelectedFailureNodeId(match ? match.id : component.name);
                     setTab("failure");
                   }}
                   className="inspector-action tone-amber"
@@ -257,18 +258,19 @@ export default function PropertyInspector({
                 <p className="font-mono text-xs font-bold text-[#7bc963]">Failure-Path Analysis</p>
 
                 <div className="space-y-2">
-                  <label className="block text-[10px] font-bold uppercase text-[#8e8c6c]">Select Failure Node</label>
+                  <label className="block text-[10px] font-bold uppercase text-[#8e8c6c]">Select Component to Simulate Failure</label>
                   <select
-                    value={selectedFailureNode || graph.nodes[0]?.name}
+                    value={effectiveFailureId}
                     onChange={(e) => {
-                      setSelectedFailureNode(e.target.value);
-                      const fResult = analyzeComponentFailurePath(graph, e.target.value);
+                      const nodeId = e.target.value;
+                      setSelectedFailureNodeId(nodeId);
+                      const fResult = analyzeComponentFailurePath(graph, nodeId);
                       onSelectRiskNodes?.([fResult.sourceNodeId, ...fResult.directlyAffectedNodeIds]);
                     }}
-                    className="w-full rounded-xl border border-[#dddb9d]/20 bg-[#12140a] p-2.5 text-xs text-[#f2f1da] outline-none"
+                    className="w-full rounded-xl border border-[#dddb9d]/20 bg-[#12140a] p-2.5 text-xs text-[#f2f1da] outline-none focus:border-[#7bc963]"
                   >
                     {graph.nodes.map((n) => (
-                      <option key={n.id} value={n.name}>{n.name} ({n.type})</option>
+                      <option key={n.id} value={n.id}>{n.name} ({n.type})</option>
                     ))}
                   </select>
                 </div>
@@ -276,7 +278,11 @@ export default function PropertyInspector({
                 {failurePathResult && (
                   <div className="rounded-2xl border border-amber-500/30 bg-[#070804] p-4 space-y-3">
                     <p className="text-xs font-bold text-amber-400">Cascading Path for {failurePathResult.sourceNodeName}:</p>
-                    <p className="font-mono text-xs text-[#7bc963]">{failurePathResult.cascadingChain.join(" → ")}</p>
+                    {failurePathResult.cascadingChain.length > 0 ? (
+                      <p className="font-mono text-xs text-[#7bc963]">{failurePathResult.cascadingChain.join(" → ")}</p>
+                    ) : (
+                      <p className="font-mono text-xs text-[#8e8c6c]">No dependent path detected.</p>
+                    )}
                     <p className="text-xs leading-relaxed text-[#c8c69d]">{failurePathResult.explanation}</p>
                     <div className="border-t border-[#dddb9d]/10 pt-2 text-[11px] text-[#7bc963] font-medium">
                       💡 {failurePathResult.resilienceRecommendation}

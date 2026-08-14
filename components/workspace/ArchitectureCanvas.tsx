@@ -1,8 +1,7 @@
 "use client";
 
 import {
-  Copy, Check, Download, Image as ImageIcon, Code2, Network,
-  ZoomIn, ZoomOut, Maximize2, RotateCcw, Expand, FileText, FileType,
+  Copy, Check, ZoomIn, ZoomOut, RotateCcw, Image as ImageIcon, FileType,
 } from "lucide-react";
 import { useEffect, useRef, useState, useCallback } from "react";
 import mermaid from "mermaid";
@@ -69,6 +68,7 @@ export default function ArchitectureCanvas({
   const [scale, setScale] = useState(1);
   const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 });
+  const renderAbortRef = useRef<AbortController | null>(null);
 
   const setupNodeListeners = useCallback(() => {
     if (!diagramRef.current || !onSelectComponent) return;
@@ -89,28 +89,46 @@ export default function ArchitectureCanvas({
   }, [onSelectComponent]);
 
   useEffect(() => {
+    if (view !== "diagram") return;
+
+    const abort = new AbortController();
+    renderAbortRef.current = abort;
+
     async function render() {
-      if (!diagramRef.current || view !== "diagram") return;
       setError(null);
       setSvgContent("");
+
+      let svgEl: HTMLDivElement | null = null;
+
       try {
         const type = result?.diagramType ?? "architecture";
         const { svg, repaired } = await renderMermaidSafe(mermaid, chart, type);
+
+        if (abort.signal.aborted) return;
+
         setRepairedChart(repaired);
         setSvgContent(svg);
-        diagramRef.current.innerHTML = svg;
+
+        svgEl = diagramRef.current;
+        if (!svgEl) return;
+        svgEl.innerHTML = svg;
         setScale(1);
         setupNodeListeners();
       } catch (err) {
-        console.error(err);
+        if (abort.signal.aborted) return;
+        console.error("[ArchitectureCanvas] render error:", err);
         setError("Diagram render failed. View source or regenerate.");
         if (diagramRef.current) diagramRef.current.innerHTML = "";
       }
     }
+
     render();
+
+    return () => {
+      abort.abort();
+    };
   }, [chart, result, view, setupNodeListeners]);
 
-  // Apply visual highlights for selectedComponent & highlightedNodeIds
   useEffect(() => {
     if (!diagramRef.current) return;
 
@@ -152,7 +170,6 @@ export default function ArchitectureCanvas({
 
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden bg-[#070804]" ref={rootRef}>
-      {/* Canvas Top Bar */}
       <div className="flex h-12 shrink-0 items-center justify-between border-b border-[#dddb9d]/15 bg-[#12140a]/90 px-4 backdrop-blur-xl z-10">
         <div className="flex items-center gap-2">
           <button
@@ -175,7 +192,6 @@ export default function ArchitectureCanvas({
           </button>
         </div>
 
-        {/* Toolbar Controls */}
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -187,7 +203,7 @@ export default function ArchitectureCanvas({
           </button>
           <button
             type="button"
-            onClick={() => setScale((s) => Math.max(0.5, s - 0.15))}
+            onClick={() => setScale((s) => Math.max(0.25, s - 0.15))}
             className="rounded-lg border border-[#dddb9d]/15 bg-[#070804] p-1.5 text-[#c8c69d] hover:text-[#f2f1da]"
             title="Zoom Out"
           >
@@ -221,7 +237,6 @@ export default function ArchitectureCanvas({
         </div>
       </div>
 
-      {/* Main Canvas Workspace */}
       <div
         className="relative flex-1 overflow-auto p-8"
         ref={viewportRef}

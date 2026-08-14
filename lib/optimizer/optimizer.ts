@@ -161,8 +161,10 @@ export function optimizeArchitecture(graph: ArchitectureGraph): OptimizationResu
     originalGraph: graph,
     optimizedGraph,
     originalHealth: originalScore.overall,
-    optimizedHealth: Math.max(originalScore.overall + 14, Math.min(98, optimizedScore.overall)),
+    optimizedHealth: Math.min(100, optimizedScore.overall),
     changes,
-    explanation: `Arqen AI optimized ${graph.title} by eliminating database read bottlenecks, adding Redis caching, deploying an API Gateway, and isolating synchronous calls into an event queue.`,
+    explanation: changes.length > 0
+      ? `Arqen AI optimized ${graph.title} by applying ${changes.length} structural change(s): ${changes.map((c) => c.title).join("; ")}.`
+      : `${graph.title} is already well-optimized. No additional structural changes were identified.`,
   };
 }

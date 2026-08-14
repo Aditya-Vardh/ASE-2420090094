@@ -12,16 +12,20 @@ type Props = {
 
 export default function ArtifactsModal({ graph, onClose }: Props) {
   const artifacts = generateImplementationArtifacts(graph);
-  const [selectedFile, setSelectedFile] = useState<ArtifactFile>(artifacts[0]);
+  const [selectedFilename, setSelectedFilename] = useState<string>(artifacts[0]?.filename || "docker-compose.yml");
   const [copied, setCopied] = useState(false);
 
+  const selectedFile = artifacts.find((a) => a.filename === selectedFilename) || artifacts[0];
+
   function handleCopy() {
+    if (!selectedFile) return;
     navigator.clipboard.writeText(selectedFile.content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
 
   function handleDownload() {
+    if (!selectedFile) return;
     const blob = new Blob([selectedFile.content], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -66,9 +70,9 @@ export default function ArtifactsModal({ graph, onClose }: Props) {
               <button
                 key={file.filename}
                 type="button"
-                onClick={() => setSelectedFile(file)}
+                onClick={() => setSelectedFilename(file.filename)}
                 className={`w-full flex items-center gap-3 rounded-xl p-3 text-left transition-all ${
-                  selectedFile.filename === file.filename
+                  selectedFilename === file.filename
                     ? "border border-[#7bc963]/30 bg-[#7bc963]/10 text-[#7bc963]"
                     : "border border-transparent hover:bg-[#12140a] text-[#c8c69d]"
                 }`}

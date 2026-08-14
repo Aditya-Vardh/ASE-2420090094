@@ -95,7 +95,7 @@ export type SimulationScenario = {
   users: number; // e.g. 100000, 1000000, 10000000
   requestRateRPS: number;
   trafficLevel: "Low" | "Medium" | "High" | "Extreme";
-  availabilityTarget: "99%" | "99.9%" | "99.99%";
+  availabilityTarget: "99%" | "99.9%" | "99.99%" | "99.999%";
   regionCount: number;
 };
 

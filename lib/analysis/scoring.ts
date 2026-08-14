@@ -6,19 +6,19 @@ export function evaluateArchitectureScore(graph: ArchitectureGraph): DetailedHea
 
   if (!nodes || nodes.length === 0) {
     return {
-      overall: 80,
-      label: "Good",
-      scalability: { score: 80, reason: "Baseline architecture configuration." },
-      reliability: { score: 80, reason: "Standard single-tier component reliability." },
-      security: { score: 85, reason: "Basic TLS and gateway authentication." },
-      performance: { score: 82, reason: "Direct HTTP routing." },
-      maintainability: { score: 84, reason: "Modular component boundaries." },
-      resilience: { score: 78, reason: "Standard failover policies." },
-      coupling: { score: 82, reason: "Decoupled component architecture." },
-      complexity: { score: 80, reason: "Manageable component count." },
-      availability: { score: 85, reason: "Single region ingress gateway." },
-      costTier: "MEDIUM",
-      costDrivers: ["Standard compute nodes", "Relational database instance"],
+      overall: 60,
+      label: "Needs Attention",
+      scalability: { score: 60, reason: "No graph components defined." },
+      reliability: { score: 60, reason: "No graph components defined." },
+      security: { score: 60, reason: "No graph components defined." },
+      performance: { score: 60, reason: "No graph components defined." },
+      maintainability: { score: 60, reason: "No graph components defined." },
+      resilience: { score: 60, reason: "No graph components defined." },
+      coupling: { score: 60, reason: "No graph components defined." },
+      complexity: { score: 60, reason: "No graph components defined." },
+      availability: { score: 60, reason: "No graph components defined." },
+      costTier: "LOW",
+      costDrivers: ["No components represented."],
     };
   }
 
@@ -95,14 +95,14 @@ export function evaluateArchitectureScore(graph: ArchitectureGraph): DetailedHea
   // Availability
   const availScore = hasGateway && hasQueue ? 92 : hasGateway ? 86 : 78;
 
-  // Overall Score
-  const overall = Math.round(
+  const overallRaw = Math.round(
     scaleScore * 0.25 +
     relScore * 0.25 +
     secScore * 0.2 +
     perfScore * 0.15 +
     maintainScore * 0.15
   );
+  const overall = Math.min(100, Math.max(0, overallRaw));
 
   let label: DetailedHealthScore["label"] = "Excellent";
   if (overall < 65) label = "Critical";

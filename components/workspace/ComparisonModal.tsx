@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { X, CheckCircle2, ArrowRight, Sparkles, AlertTriangle, ShieldCheck, Zap } from "lucide-react";
+import { X, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
 import type { OptimizationResult } from "@/lib/graph/types";
+import { graphToMermaid } from "@/lib/graph/serializer";
 import ArchitectureCanvas from "./ArchitectureCanvas";
 
 type Props = {
@@ -14,13 +15,13 @@ type Props = {
 export default function ComparisonModal({ result, onClose, onApplyOptimized }: Props) {
   const [activeView, setActiveView] = useState<"side" | "original" | "optimized">("side");
 
-  const origMermaid = result.originalGraph.nodes.map((n) => `    ${n.id}["${n.name}"]`).join("\n");
-  const optMermaid = result.optimizedGraph.nodes.map((n) => `    ${n.id}["${n.name}"]`).join("\n");
+  const origMermaid = graphToMermaid(result.originalGraph);
+  const optMermaid = graphToMermaid(result.optimizedGraph);
+  const gain = result.optimizedHealth - result.originalHealth;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-xl animate-fade-in">
       <div className="flex h-[90vh] w-[95vw] max-w-7xl flex-col overflow-hidden rounded-3xl border border-[#dddb9d]/20 bg-[#0a0b04] text-[#f2f1da] shadow-[0_0_80px_rgba(0,0,0,0.9)]">
-        {/* Top Header */}
         <div className="flex items-center justify-between border-b border-[#dddb9d]/15 bg-[#12140a] px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#dddb9d] via-[#7bc963] to-[#567f2b] p-[1px]">
@@ -35,15 +36,21 @@ export default function ComparisonModal({ result, onClose, onApplyOptimized }: P
           </div>
 
           <div className="flex items-center gap-4">
-            {/* Score Gain Badge */}
             <div className="flex items-center gap-2 rounded-full border border-[#7bc963]/30 bg-[#7bc963]/10 px-4 py-1.5">
-              <span className="text-xs font-mono text-[#8e8c6c]">Health Score Gain:</span>
-              <span className="font-mono text-sm font-bold text-[#c8c69d]">{result.originalHealth}</span>
+              <span className="text-xs font-mono text-[#8e8c6c]">Health Score:</span>
+              <span className="font-mono text-sm font-bold text-[#c8c69d]">{result.originalHealth}/100</span>
               <ArrowRight className="h-3.5 w-3.5 text-[#7bc963]" />
-              <span className="font-mono text-base font-extrabold text-[#7bc963]">{result.optimizedHealth} / 100</span>
-              <span className="rounded-md bg-[#7bc963] px-2 py-0.5 font-mono text-[11px] font-bold text-[#0a0b04]">
-                +{result.optimizedHealth - result.originalHealth} pts
-              </span>
+              <span className="font-mono text-base font-extrabold text-[#7bc963]">{result.optimizedHealth}/100</span>
+              {gain > 0 && (
+                <span className="rounded-md bg-[#7bc963] px-2 py-0.5 font-mono text-[11px] font-bold text-[#0a0b04]">
+                  +{gain} pts
+                </span>
+              )}
+              {gain === 0 && (
+                <span className="rounded-md bg-[#dddb9d]/20 px-2 py-0.5 font-mono text-[11px] font-bold text-[#c8c69d]">
+                  No change
+                </span>
+              )}
             </div>
 
             <button
@@ -56,7 +63,6 @@ export default function ComparisonModal({ result, onClose, onApplyOptimized }: P
           </div>
         </div>
 
-        {/* View Toggle Tabs */}
         <div className="flex items-center justify-between border-b border-[#dddb9d]/10 bg-[#070804] px-6 py-2.5">
           <div className="flex items-center gap-2 font-mono text-xs text-[#8e8c6c]">
             <span>Comparing:</span>
@@ -64,34 +70,42 @@ export default function ComparisonModal({ result, onClose, onApplyOptimized }: P
           </div>
 
           <div className="flex items-center gap-1.5 rounded-xl border border-[#dddb9d]/15 bg-[#12140a] p-1">
-            {(["side", "original", "optimized"] as const).map((v) => (
+            {([
+              { v: "side" as const, label: "Split View" },
+              { v: "original" as const, label: `Original (${result.originalHealth})` },
+              { v: "optimized" as const, label: `Optimized (${result.optimizedHealth})` },
+            ]).map(({ v, label }) => (
               <button
                 key={v}
                 type="button"
                 onClick={() => setActiveView(v)}
-                className={`rounded-lg px-3.5 py-1 text-xs font-bold capitalize transition-all ${
+                className={`rounded-lg px-3.5 py-1 text-xs font-bold transition-all ${
                   activeView === v
                     ? "bg-[#7bc963] text-[#0a0b04]"
                     : "text-[#c8c69d] hover:text-[#f2f1da]"
                 }`}
               >
-                {v === "side" ? "Split View" : v === "original" ? "Original (78)" : "Optimized (94)"}
+                {label}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Split View Workspace */}
         <div className="flex flex-1 min-h-0 overflow-hidden">
-          {/* Left: Modifications Explanation */}
-          <div className="w-80 border-r border-[#dddb9d]/15 bg-[#0a0b04] p-5 overflow-y-auto shrink-0 space-y-4">
+          <div className="w-72 border-r border-[#dddb9d]/15 bg-[#0a0b04] p-5 overflow-y-auto shrink-0 space-y-4">
             <div>
               <p className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#7bc963]">Optimization Summary</p>
               <p className="mt-1 text-xs leading-relaxed text-[#c8c69d]">{result.explanation}</p>
             </div>
 
             <div className="space-y-3 pt-2">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#8e8c6c]">Applied Structural Changes ({result.changes.length})</p>
+              <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#8e8c6c]">
+                Applied Structural Changes ({result.changes.length})
+              </p>
+
+              {result.changes.length === 0 && (
+                <p className="text-xs text-[#8e8c6c] italic">No structural changes applied — architecture already optimized.</p>
+              )}
 
               {result.changes.map((c) => (
                 <div key={c.id} className="rounded-2xl border border-[#dddb9d]/15 bg-[#12140a] p-3.5 space-y-2">
@@ -112,44 +126,44 @@ export default function ComparisonModal({ result, onClose, onApplyOptimized }: P
             </div>
           </div>
 
-          {/* Right Canvas Area */}
           <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden bg-[#070804]">
             {activeView === "side" ? (
-              <div className="grid flex-1 grid-cols-2 divide-x divide-[#dddb9d]/15">
+              <div className="grid flex-1 grid-cols-2 divide-x divide-[#dddb9d]/15 min-h-0">
                 <div className="flex flex-col min-h-0">
-                  <div className="border-b border-[#dddb9d]/10 bg-[#12140a] px-4 py-2 text-xs font-bold text-[#c8c69d] flex items-center justify-between">
+                  <div className="border-b border-[#dddb9d]/10 bg-[#12140a] px-4 py-2 text-xs font-bold text-[#c8c69d] flex items-center justify-between shrink-0">
                     <span>Original Architecture</span>
                     <span className="font-mono text-[#8e8c6c]">Health: {result.originalHealth}/100</span>
                   </div>
-                  <div className="flex-1 relative overflow-hidden">
-                    <ArchitectureCanvas chart={`flowchart TB\n${origMermaid}`} />
+                  <div className="flex-1 relative overflow-hidden min-h-0">
+                    <ArchitectureCanvas chart={origMermaid} />
                   </div>
                 </div>
 
                 <div className="flex flex-col min-h-0">
-                  <div className="border-b border-[#dddb9d]/10 bg-[#12140a] px-4 py-2 text-xs font-bold text-[#7bc963] flex items-center justify-between">
+                  <div className="border-b border-[#dddb9d]/10 bg-[#12140a] px-4 py-2 text-xs font-bold text-[#7bc963] flex items-center justify-between shrink-0">
                     <span>Optimized Architecture</span>
                     <span className="font-mono text-[#7bc963]">Health: {result.optimizedHealth}/100</span>
                   </div>
-                  <div className="flex-1 relative overflow-hidden">
-                    <ArchitectureCanvas chart={`flowchart TB\n${optMermaid}`} />
+                  <div className="flex-1 relative overflow-hidden min-h-0">
+                    <ArchitectureCanvas chart={optMermaid} />
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="flex-1 relative overflow-hidden">
+              <div className="flex-1 relative overflow-hidden min-h-0">
                 <ArchitectureCanvas
-                  chart={`flowchart TB\n${activeView === "original" ? origMermaid : optMermaid}`}
+                  chart={activeView === "original" ? origMermaid : optMermaid}
                 />
               </div>
             )}
           </div>
         </div>
 
-        {/* Footer Actions */}
         <div className="flex items-center justify-between border-t border-[#dddb9d]/15 bg-[#12140a] px-6 py-4">
           <p className="text-xs text-[#8e8c6c]">
-            Applying optimizations updates the architecture project state and version graph.
+            {result.changes.length > 0
+              ? "Applying optimizations updates the architecture project state and creates a version snapshot."
+              : "No changes to apply — architecture is already at an optimal configuration."}
           </p>
 
           <div className="flex items-center gap-3">
@@ -163,11 +177,9 @@ export default function ComparisonModal({ result, onClose, onApplyOptimized }: P
 
             <button
               type="button"
-              onClick={() => {
-                onApplyOptimized();
-                onClose();
-              }}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#dddb9d] via-[#7bc963] to-[#567f2b] px-6 py-2.5 text-xs font-bold text-[#0a0b04] shadow-[0_0_25px_rgba(123,201,99,0.4)] hover:scale-[1.02] transition-all"
+              onClick={() => { onApplyOptimized(); onClose(); }}
+              disabled={result.changes.length === 0}
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#dddb9d] via-[#7bc963] to-[#567f2b] px-6 py-2.5 text-xs font-bold text-[#0a0b04] shadow-[0_0_25px_rgba(123,201,99,0.4)] hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               <CheckCircle2 className="h-4 w-4" />
               <span>Apply Optimized Architecture ({result.optimizedHealth}/100)</span>

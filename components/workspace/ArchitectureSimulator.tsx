@@ -124,8 +124,8 @@ export default function ArchitectureSimulator({ graph, onClose, onHighlightBottl
             {/* Selector 3: Availability SLA */}
             <div className="space-y-2">
               <span className="block text-xs font-bold text-[#c8c69d]">Availability Target (SLA)</span>
-              <div className="grid grid-cols-3 gap-2">
-                {(["99%", "99.9%", "99.99%"] as const).map((a) => (
+              <div className="grid grid-cols-4 gap-2">
+                {(["99%", "99.9%", "99.99%", "99.999%"] as const).map((a) => (
                   <button
                     key={a}
                     type="button"

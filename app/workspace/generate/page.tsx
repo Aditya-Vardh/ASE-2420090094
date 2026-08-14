@@ -247,7 +247,7 @@ function GenerateContent() {
   }
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-[#0a0b04] text-[#f2f1da]">
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-background text-foreground">
       <WorkspaceHeader
         title={title}
         onTitleChange={(v) => { setTitle(v); if (activeGraph) commitGraphUpdate({ ...activeGraph, title: v }); }}

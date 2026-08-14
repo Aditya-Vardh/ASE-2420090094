@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 import {
@@ -46,15 +46,28 @@ type Props = { open: boolean; onClose: () => void };
 
 export default function LineSidebar({ open, onClose }: Props) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [collapsed, setCollapsed] = useState(false);
 
   function isActive(href: string, exact?: boolean) {
-    const base = href.split("?")[0];
-    if (exact || base === "/workspace") return pathname === base;
-    if (base === "/workspace/generate") {
-      return pathname.startsWith("/workspace/generate") && !pathname.startsWith("/workspace/uml");
+    const [base, queryStr] = href.split("?");
+    const matchesPath = pathname === base;
+    if (!matchesPath) return false;
+
+    if (queryStr) {
+      const requiredParams = new URLSearchParams(queryStr);
+      for (const [key, val] of requiredParams.entries()) {
+        if (searchParams.get(key) !== val) {
+          return false;
+        }
+      }
+      return true;
+    } else {
+      if (base === "/workspace/generate") {
+        return !searchParams.get("new") && !searchParams.get("project") && !searchParams.get("template") && !searchParams.get("journey");
+      }
+      return true;
     }
-    return pathname.startsWith(base);
   }
 
   const width = collapsed ? "w-[72px]" : "w-[260px]";
@@ -66,13 +79,13 @@ export default function LineSidebar({ open, onClose }: Props) {
       )}
 
       <aside
-        className={`${width} ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} fixed inset-y-0 left-0 z-50 flex flex-col transition-all duration-300 lg:static bg-[#0a0b04] border-r border-[#dddb9d]/15 backdrop-blur-2xl`}
+        className={`${width} ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} fixed inset-y-0 left-0 z-50 flex flex-col transition-all duration-300 lg:static bg-background border-r border-[#dddb9d]/15 backdrop-blur-2xl`}
       >
         {/* Brand Header */}
         <div className="flex items-center justify-between gap-3 px-4 py-5 border-b border-[#dddb9d]/15">
           <Link href="/" className="flex min-w-0 items-center gap-3" onClick={onClose}>
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#dddb9d] via-[#7bc963] to-[#567f2b] p-[1px] shadow-[0_0_20px_rgba(123,201,99,0.3)]">
-              <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-[#0a0b04]">
+              <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-background">
                 <Image src="/icon.svg" alt="ArchiGen Logo" width={22} height={22} className="rounded" />
               </div>
             </div>
@@ -146,7 +159,7 @@ export default function LineSidebar({ open, onClose }: Props) {
           <div className="p-4 border-t border-[#dddb9d]/15">
             <div className="flex items-center gap-3 rounded-2xl bg-[#12140a] p-3 border border-[#dddb9d]/15">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#dddb9d] via-[#7bc963] to-[#567f2b] p-[1px] shadow-[0_0_15px_rgba(123,201,99,0.3)]">
-                <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-[#0a0b04]">
+                <div className="flex h-full w-full items-center justify-center rounded-[11px] bg-background">
                   <Image src="/icon.svg" alt="Pro AI Avatar" width={18} height={18} className="rounded" />
                 </div>
               </div>

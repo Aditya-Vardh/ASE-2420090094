@@ -2,8 +2,7 @@
 @import "tailwindcss";
 
 :root,
-[data-theme="dark"],
-[data-theme="light"] {
+[data-theme="dark"] {
   /* Realtime Colors Theme Palette */
   --color-text: #f2f1da;
   --color-bg: #0a0b04;
@@ -68,6 +67,89 @@
   --shadow-md: 0 12px 36px rgba(0, 0, 0, 0.7);
   --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.85);
   --shadow-glow: 0 0 40px rgba(123, 201, 99, 0.25);
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.85rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: var(--radius);
+
+  --blur-glass: 24px;
+
+  /* Requested Font Sizes */
+  --text-sm: 0.750rem;
+  --text-base: 1rem;
+  --text-xl: 1.333rem;
+  --text-2xl: 1.777rem;
+  --text-3xl: 2.369rem;
+  --text-4xl: 3.158rem;
+  --text-5xl: 4.210rem;
+}
+
+[data-theme="light"] {
+  /* Light Mode Realtime Colors Palette */
+  --color-text: #0d0f06;
+  --color-bg: #fdfdf9;
+  --color-primary: #567f2b;
+  --color-secondary: #dddb9d;
+  --color-accent: #3b5f1b;
+
+  --bg-base: #fdfdf9;
+  --bg-surface: #f4f5ee;
+  --bg-elevated: #eaece0;
+  --border-subtle: rgba(86, 127, 43, 0.14);
+  --border-strong: rgba(86, 127, 43, 0.28);
+  --text-primary: #0d0f06;
+  --text-muted: #4e5f3b;
+  --text-faint: #6c7e5a;
+  --accent-primary: linear-gradient(135deg, #567f2b, #7bc963);
+  --accent-cyan: #567f2b;
+  --radius: 16px;
+
+  /* Premium Design Tokens */
+  --background: #fdfdf9;
+  --background-2: #f4f5ee;
+  --foreground: #0d0f06;
+  --text-secondary: #4e5f3b;
+  --text-subtle: #6c7e5a;
+  --surface: #f4f5ee;
+  --surface-elevated: #eaece0;
+  --surface-glass: rgba(244, 245, 238, 0.82);
+  --surface-glass-light: rgba(86, 127, 43, 0.05);
+  --surface-glass-strong: rgba(253, 253, 249, 0.94);
+  --border: rgba(86, 127, 43, 0.14);
+  --border-hover: rgba(86, 127, 43, 0.32);
+  --border-glow: rgba(86, 127, 43, 0.5);
+
+  --accent: #567f2b;
+  --accent-hover: #3b5f1b;
+  --accent-secondary: #7bc963;
+  --accent-tertiary: #dddb9d;
+  --accent-cyan: #567f2b;
+  --accent-glow: rgba(86, 127, 43, 0.3);
+  --accent-subtle: rgba(86, 127, 43, 0.15);
+  --ai-accent: #567f2b;
+  --ai-glow: rgba(86, 127, 43, 0.25);
+  --cyan-glow: rgba(86, 127, 43, 0.3);
+  --pink-glow: rgba(86, 127, 43, 0.2);
+
+  --success: #7bc963;
+  --warning: #dddb9d;
+  --error: #f43f5e;
+  --info: #567f2b;
+
+  --arch-frontend: #567f2b;
+  --arch-backend: #4e5f3b;
+  --arch-database: #dddb9d;
+  --arch-cache: #7bc963;
+  --arch-security: #f43f5e;
+  --arch-external: #4e5f3b;
+  --arch-infra: #6c7e5a;
+  --arch-ai: #567f2b;
+
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 12px 36px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.2);
+  --shadow-glow: 0 0 40px rgba(86, 127, 43, 0.15);
 
   --radius-sm: 0.5rem;
   --radius-md: 0.85rem;

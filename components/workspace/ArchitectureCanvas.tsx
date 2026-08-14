@@ -3,14 +3,12 @@
 import {
   Copy, Check, Download, Image as ImageIcon, Code2, Network,
   ZoomIn, ZoomOut, Maximize2, RotateCcw, Expand, FileText, FileType,
-  type LucideIcon,
 } from "lucide-react";
 import { useEffect, useRef, useState, useCallback } from "react";
 import mermaid from "mermaid";
 import type { ArchitectureResult } from "@/lib/storage/types";
 import { downloadText, svgToPng, svgToPdf, toMarkdownExport } from "@/lib/export";
 import { renderMermaidSafe } from "@/lib/mermaid-repair";
-import GlassSurface from "@/components/ui/GlassSurface";
 
 mermaid.initialize({
   startOnLoad: false,
@@ -53,11 +51,12 @@ type Props = {
   result?: ArchitectureResult;
   onRegenerate?: () => void;
   selectedComponent?: string | null;
+  highlightedNodeIds?: string[];
   onSelectComponent?: (name: string | null) => void;
 };
 
 export default function ArchitectureCanvas({
-  chart, result, onRegenerate, selectedComponent, onSelectComponent,
+  chart, result, onRegenerate, selectedComponent, highlightedNodeIds = [], onSelectComponent,
 }: Props) {
   const rootRef = useRef<HTMLDivElement>(null);
   const diagramRef = useRef<HTMLDivElement>(null);
@@ -71,6 +70,24 @@ export default function ArchitectureCanvas({
   const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 });
 
+  const setupNodeListeners = useCallback(() => {
+    if (!diagramRef.current || !onSelectComponent) return;
+
+    const nodeElements = diagramRef.current.querySelectorAll(
+      ".node, g[id*='flowchart-'], g.nodeGroup, g.cluster"
+    );
+
+    nodeElements.forEach((el) => {
+      const htmlEl = el as HTMLElement;
+      htmlEl.style.cursor = "pointer";
+      htmlEl.onclick = (e) => {
+        e.stopPropagation();
+        const text = htmlEl.textContent?.trim();
+        if (text) onSelectComponent(text);
+      };
+    });
+  }, [onSelectComponent]);
+
   useEffect(() => {
     async function render() {
       if (!diagramRef.current || view !== "diagram") return;
@@ -83,16 +100,7 @@ export default function ArchitectureCanvas({
         setSvgContent(svg);
         diagramRef.current.innerHTML = svg;
         setScale(1);
-
-        if (onSelectComponent) {
-          diagramRef.current.querySelectorAll("[id]").forEach((el) => {
-            el.addEventListener("click", (e) => {
-              e.stopPropagation();
-              const text = el.textContent?.trim();
-              if (text) onSelectComponent(text);
-            });
-          });
-        }
+        setupNodeListeners();
       } catch (err) {
         console.error(err);
         setError("Diagram render failed. View source or regenerate.");
@@ -100,135 +108,181 @@ export default function ArchitectureCanvas({
       }
     }
     render();
-  }, [chart, view, result?.diagramType, onSelectComponent]);
+  }, [chart, result, view, setupNodeListeners]);
 
-  const copyCode = useCallback(async () => {
-    await navigator.clipboard.writeText(repairedChart);
+  // Apply visual highlights for selectedComponent & highlightedNodeIds
+  useEffect(() => {
+    if (!diagramRef.current) return;
+
+    const allNodes = diagramRef.current.querySelectorAll(".node, g[id*='flowchart-']");
+    allNodes.forEach((nodeEl) => {
+      const htmlEl = nodeEl as HTMLElement;
+      const text = htmlEl.textContent?.trim().toLowerCase() || "";
+      const isSelected = selectedComponent && text.includes(selectedComponent.toLowerCase());
+      const isHighlighted = highlightedNodeIds.some((id) => text.includes(id.toLowerCase()));
+
+      if (isSelected || isHighlighted) {
+        htmlEl.style.outline = "2px solid #7bc963";
+        htmlEl.style.outlineOffset = "4px";
+        htmlEl.style.filter = "drop-shadow(0 0 12px rgba(123,201,99,0.8))";
+      } else {
+        htmlEl.style.outline = "none";
+        htmlEl.style.filter = "none";
+      }
+    });
+  }, [selectedComponent, highlightedNodeIds, svgContent]);
+
+  function handleCopy() {
+    navigator.clipboard.writeText(repairedChart);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  }, [repairedChart]);
-
-  async function toggleFullscreen() {
-    if (!rootRef.current) return;
-    if (document.fullscreenElement) await document.exitFullscreen();
-    else await rootRef.current.requestFullscreen();
   }
 
-  function onPointerDown(e: React.PointerEvent) {
-    if (view !== "diagram" || !viewportRef.current) return;
-    setIsPanning(true);
-    panStart.current = { x: e.clientX, y: e.clientY, scrollLeft: viewportRef.current.scrollLeft, scrollTop: viewportRef.current.scrollTop };
-    viewportRef.current.setPointerCapture(e.pointerId);
+  function handleExportPng() {
+    if (svgContent) {
+      svgToPng(svgContent, `${(result?.title || "architecture").toLowerCase().replace(/\s+/g, "-")}.png`);
+    }
   }
 
-  function onPointerMove(e: React.PointerEvent) {
-    if (!isPanning || !viewportRef.current) return;
-    viewportRef.current.scrollLeft = panStart.current.scrollLeft - (e.clientX - panStart.current.x);
-    viewportRef.current.scrollTop = panStart.current.scrollTop - (e.clientY - panStart.current.y);
-  }
-
-  function onPointerUp(e: React.PointerEvent) {
-    setIsPanning(false);
-    viewportRef.current?.releasePointerCapture(e.pointerId);
+  function handleExportPdf() {
+    if (svgContent) {
+      svgToPdf(svgContent, `${(result?.title || "architecture").toLowerCase().replace(/\s+/g, "-")}.pdf`);
+    }
   }
 
   return (
-    <GlassSurface variant="canvas" className="architecture-canvas" ref={rootRef} data-diagram-root>
-      <div className="canvas-viewport-wrap">
+    <div className="relative flex h-full w-full flex-col overflow-hidden bg-[#070804]" ref={rootRef}>
+      {/* Canvas Top Bar */}
+      <div className="flex h-12 shrink-0 items-center justify-between border-b border-[#dddb9d]/15 bg-[#12140a]/90 px-4 backdrop-blur-xl z-10">
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setView("diagram")}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+              view === "diagram" ? "bg-[#7bc963] text-[#0a0b04]" : "text-[#c8c69d] hover:text-[#f2f1da]"
+            }`}
+          >
+            Diagram View
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("code")}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+              view === "code" ? "bg-[#7bc963] text-[#0a0b04]" : "text-[#c8c69d] hover:text-[#f2f1da]"
+            }`}
+          >
+            Mermaid Source
+          </button>
+        </div>
+
+        {/* Toolbar Controls */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setScale((s) => Math.min(2, s + 0.15))}
+            className="rounded-lg border border-[#dddb9d]/15 bg-[#070804] p-1.5 text-[#c8c69d] hover:text-[#f2f1da]"
+            title="Zoom In"
+          >
+            <ZoomIn className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setScale((s) => Math.max(0.5, s - 0.15))}
+            className="rounded-lg border border-[#dddb9d]/15 bg-[#070804] p-1.5 text-[#c8c69d] hover:text-[#f2f1da]"
+            title="Zoom Out"
+          >
+            <ZoomOut className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setScale(1)}
+            className="rounded-lg border border-[#dddb9d]/15 bg-[#070804] p-1.5 text-[#c8c69d] hover:text-[#f2f1da]"
+            title="Reset Zoom"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </button>
+
+          <div className="h-4 w-[1px] bg-[#dddb9d]/15 mx-1" />
+
+          <button
+            type="button"
+            onClick={handleExportPng}
+            className="flex items-center gap-1.5 rounded-lg border border-[#dddb9d]/15 bg-[#070804] px-2.5 py-1.5 text-xs font-bold text-[#c8c69d] hover:text-[#f2f1da]"
+          >
+            <ImageIcon className="h-3.5 w-3.5" /> PNG
+          </button>
+          <button
+            type="button"
+            onClick={handleExportPdf}
+            className="flex items-center gap-1.5 rounded-lg border border-[#dddb9d]/15 bg-[#070804] px-2.5 py-1.5 text-xs font-bold text-[#c8c69d] hover:text-[#f2f1da]"
+          >
+            <FileType className="h-3.5 w-3.5" /> PDF
+          </button>
+        </div>
+      </div>
+
+      {/* Main Canvas Workspace */}
+      <div
+        className="relative flex-1 overflow-auto p-8"
+        ref={viewportRef}
+        onMouseDown={(e) => {
+          if (e.target === viewportRef.current || e.target === diagramRef.current) {
+            setIsPanning(true);
+            panStart.current = { x: e.clientX, y: e.clientY, scrollLeft: viewportRef.current?.scrollLeft || 0, scrollTop: viewportRef.current?.scrollTop || 0 };
+          }
+        }}
+        onMouseMove={(e) => {
+          if (isPanning && viewportRef.current) {
+            viewportRef.current.scrollLeft = panStart.current.scrollLeft - (e.clientX - panStart.current.x);
+            viewportRef.current.scrollTop = panStart.current.scrollTop - (e.clientY - panStart.current.y);
+          }
+        }}
+        onMouseUp={() => setIsPanning(false)}
+        onMouseLeave={() => setIsPanning(false)}
+      >
+        {selectedComponent && (
+          <div className="absolute top-4 left-4 z-20 flex items-center gap-2 rounded-full border border-[#7bc963]/40 bg-[#12140a]/90 px-3.5 py-1 backdrop-blur-md shadow-[0_0_20px_rgba(123,201,99,0.3)]">
+            <span className="h-2 w-2 rounded-full bg-[#7bc963]" />
+            <span className="font-mono text-xs font-bold text-[#7bc963]">Selected: {selectedComponent}</span>
+            <button type="button" onClick={() => onSelectComponent?.(null)} className="text-[#8e8c6c] hover:text-[#f2f1da]">
+              ×
+            </button>
+          </div>
+        )}
+
         {view === "diagram" ? (
-          error ? (
-            <div className="canvas-error">
-              <h3>Architecture generation failed</h3>
-              <p>{error}</p>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setView("code")} className="inspector-action tone-cyan">View source</button>
-                {onRegenerate && <button type="button" onClick={onRegenerate} className="inspector-action tone-violet">Try again</button>}
-              </div>
-            </div>
-          ) : (
-            <div
-              ref={viewportRef}
-              className={`canvas-viewport ${isPanning ? "is-panning" : ""}`}
-              onPointerDown={onPointerDown}
-              onPointerMove={onPointerMove}
-              onPointerUp={onPointerUp}
-              onPointerLeave={onPointerUp}
-            >
-              <div ref={diagramRef} style={{ transform: `scale(${scale})`, transformOrigin: "top left" }} className="canvas-diagram" />
-            </div>
-          )
+          <div
+            ref={diagramRef}
+            className="flex min-h-full min-w-full items-center justify-center transition-transform duration-150"
+            style={{ transform: `scale(${scale})`, transformOrigin: "center center" }}
+          />
         ) : (
-          <div className="canvas-source-editor">
-            <textarea
-              value={repairedChart}
-              readOnly
-              className="source-textarea"
-              aria-label="Mermaid source"
-            />
+          <div className="h-full w-full max-w-4xl mx-auto space-y-4">
+            <div className="flex justify-end">
+              <button type="button" onClick={handleCopy} className="flex items-center gap-1.5 rounded-xl bg-[#7bc963] px-3.5 py-1.5 text-xs font-bold text-[#0a0b04]">
+                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                <span>{copied ? "Copied Source" : "Copy Mermaid Source"}</span>
+              </button>
+            </div>
+            <pre className="rounded-2xl border border-[#dddb9d]/20 bg-[#12140a] p-6 text-xs font-mono text-[#c8c69d] overflow-x-auto whitespace-pre-wrap">
+              {repairedChart}
+            </pre>
+          </div>
+        )}
+
+        {error && (
+          <div className="absolute inset-0 flex items-center justify-center bg-[#070804]/90 p-6 text-center">
+            <div className="max-w-md space-y-4">
+              <p className="text-sm text-rose-300 font-bold">{error}</p>
+              {onRegenerate && (
+                <button type="button" onClick={onRegenerate} className="rounded-xl bg-[#7bc963] px-5 py-2 text-xs font-bold text-[#0a0b04]">
+                  Regenerate Diagram
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>
-
-      <div className="floating-toolbar">
-        <ToolbarGroup>
-          <TBtn icon={Network} active={view === "diagram"} onClick={() => setView("diagram")} title="Diagram" />
-          <TBtn icon={Code2} active={view === "code"} onClick={() => setView("code")} title="Source" />
-        </ToolbarGroup>
-        <ToolbarDivider />
-        {view === "diagram" && (
-          <ToolbarGroup>
-            <TBtn icon={ZoomOut} onClick={() => setScale((s) => Math.max(s - 0.25, 0.25))} title="Zoom out" />
-            <TBtn icon={ZoomIn} onClick={() => setScale((s) => Math.min(s + 0.25, 3))} title="Zoom in" />
-            <TBtn icon={Maximize2} onClick={() => { setScale(1); viewportRef.current?.scrollTo({ left: 0, top: 0, behavior: "smooth" }); }} title="Fit" />
-            <TBtn icon={RotateCcw} onClick={() => setScale(1)} title="Reset" />
-            <TBtn icon={Expand} onClick={toggleFullscreen} title="Fullscreen" />
-          </ToolbarGroup>
-        )}
-        <ToolbarDivider />
-        <ToolbarGroup>
-          <TBtn icon={copied ? Check : Copy} onClick={copyCode} title="Copy" />
-          <TBtn icon={Download} onClick={() => svgContent && downloadText(svgContent, "diagram.svg", "image/svg+xml")} title="SVG" disabled={!svgContent} />
-          <TBtn icon={ImageIcon} onClick={() => svgContent && svgToPng(svgContent, "diagram.png")} title="PNG" disabled={!svgContent} />
-          <TBtn icon={FileType} onClick={() => svgContent && svgToPdf(svgContent, "diagram.pdf")} title="PDF" disabled={!svgContent} />
-          {result && <TBtn icon={FileText} onClick={() => downloadText(toMarkdownExport(result), "architecture.md", "text/markdown")} title="Markdown" />}
-          {onRegenerate && <TBtn icon={RotateCcw} onClick={onRegenerate} title="Regenerate" />}
-        </ToolbarGroup>
-      </div>
-
-      {selectedComponent && (
-        <div className="canvas-selection-badge">{selectedComponent}</div>
-      )}
-
-      <div className="arch-legend absolute left-3 bottom-14 z-[5] hidden sm:flex rounded-lg border border-border bg-surface-glass-strong/90 backdrop-blur-md">
-        {[
-          { label: "Frontend", color: "var(--arch-frontend)" },
-          { label: "Backend", color: "var(--arch-backend)" },
-          { label: "Data", color: "var(--arch-database)" },
-          { label: "AI", color: "var(--arch-ai)" },
-          { label: "Infra", color: "var(--arch-infra)" },
-        ].map((l) => (
-          <span key={l.label} className="arch-legend-item">
-            <span className="arch-legend-dot" style={{ background: l.color }} />
-            {l.label}
-          </span>
-        ))}
-      </div>
-    </GlassSurface>
-  );
-}
-
-function ToolbarGroup({ children }: { children: React.ReactNode }) {
-  return <div className="toolbar-group">{children}</div>;
-}
-
-function ToolbarDivider() {
-  return <div className="toolbar-divider" />;
-}
-
-function TBtn({ icon: Icon, onClick, title, active, disabled }: { icon: LucideIcon; onClick: () => void; title: string; active?: boolean; disabled?: boolean }) {
-  return (
-    <button type="button" onClick={onClick} title={title} disabled={disabled} className={`toolbar-btn ${active ? "toolbar-btn-active" : ""}`}>
-      <Icon className="h-4 w-4" />
-    </button>
+    </div>
   );
 }

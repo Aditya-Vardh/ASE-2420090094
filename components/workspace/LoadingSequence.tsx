@@ -12,9 +12,9 @@ const STEPS = [
   "Preparing insights",
 ];
 
-type Props = { active: boolean };
+type Props = { active?: boolean };
 
-export default function LoadingSequence({ active }: Props) {
+export default function LoadingSequence({ active = true }: Props) {
   const [stepIndex, setStepIndex] = useState(0);
 
   useEffect(() => {

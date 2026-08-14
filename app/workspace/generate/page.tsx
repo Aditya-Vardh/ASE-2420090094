@@ -2,26 +2,31 @@
 
 import { useCallback, useEffect, useRef, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { AlertCircle, ChevronDown, ChevronUp, Layers, PanelRight, Sparkles, Wand2, RefreshCw } from "lucide-react";
+import { AlertCircle, ChevronDown, ChevronUp, Layers, PanelRight, Sparkles, Wand2, RefreshCw, Zap, Cpu, Code2, AlertTriangle, CheckCircle2 } from "lucide-react";
 import AIGenerationPanel from "@/components/workspace/AIGenerationPanel";
 import LoadingSequence from "@/components/workspace/LoadingSequence";
 import ArchitectureCanvas from "@/components/workspace/ArchitectureCanvas";
 import PropertyInspector from "@/components/workspace/PropertyInspector";
 import AIAssistantDock from "@/components/workspace/AIAssistantDock";
 import WorkspaceHeader from "@/components/workspace/WorkspaceHeader";
+import ComparisonModal from "@/components/workspace/ComparisonModal";
+import ArchitectureSimulator from "@/components/workspace/ArchitectureSimulator";
+import ArtifactsModal from "@/components/workspace/ArtifactsModal";
+import ComponentDetailModal from "@/components/workspace/ComponentDetailModal";
+import GuidedJourneyModal from "@/components/workspace/GuidedJourneyModal";
+
 import { DIAGRAM_TYPE_LABELS, type ArchitectureResult, type DiagramType } from "@/lib/storage/types";
 import {
-  addHistoryEntry,
-  createProject,
-  generateId,
-  getActiveProjectId,
-  getProject,
-  getSettings,
-  saveProject,
-  setActiveProjectId,
+  addHistoryEntry, createProject, generateId, getActiveProjectId, getProject, getSettings, saveProject, setActiveProjectId,
 } from "@/lib/storage/store";
 import { getTemplate } from "@/lib/templates";
 import { toMarkdownExport, downloadText } from "@/lib/export";
+import { parseMermaidToGraph } from "@/lib/graph/parser";
+import { graphToMermaid, addCacheToGraph, addGatewayToGraph, improveComponentInGraph } from "@/lib/graph/serializer";
+import { optimizeArchitecture } from "@/lib/optimizer/optimizer";
+import { evaluateArchitectureScore } from "@/lib/analysis/scoring";
+import { analyzeArchitectureRisks } from "@/lib/analysis/risk";
+import type { ArchitectureGraph, OptimizationResult, ArchNode } from "@/lib/graph/types";
 
 function GenerateContent() {
   const searchParams = useSearchParams();
@@ -32,22 +37,41 @@ function GenerateContent() {
   const [diagramType, setDiagramType] = useState<DiagramType>("architecture");
   const [result, setResult] = useState<ArchitectureResult | null>(null);
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
+  const [highlightedNodeIds, setHighlightedNodeIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [showInspector, setShowInspector] = useState(false);
   const [editPromptOpen, setEditPromptOpen] = useState(true);
 
+  // Active Canonical ArchitectureGraph
+  const [activeGraph, setActiveGraph] = useState<ArchitectureGraph | null>(null);
+
+  // Modals state
+  const [optimizationResult, setOptimizationResult] = useState<OptimizationResult | null>(null);
+  const [showSimulator, setShowSimulator] = useState(false);
+  const [showArtifacts, setShowArtifacts] = useState(false);
+  const [showJourney, setShowJourney] = useState(false);
+  const [detailNode, setDetailNode] = useState<ArchNode | null>(null);
+
+  // AI Confirmation Modal State
+  const [pendingMutation, setPendingMutation] = useState<{ type: string; targetId?: string; title: string; desc: string } | null>(null);
+
   useEffect(() => {
     const settings = getSettings();
     const templateId = searchParams.get("template");
     const projectParam = searchParams.get("project");
     const isNew = searchParams.get("new");
+    const isJourney = searchParams.get("journey") === "1";
     const typeParam = searchParams.get("type") as DiagramType | null;
     const validTypes: DiagramType[] = [
       "class", "sequence", "er", "flowchart", "component", "deployment", "state", "architecture",
     ];
     const typeFromUrl = typeParam && validTypes.includes(typeParam) ? typeParam : null;
+
+    if (isJourney) {
+      setShowJourney(true);
+    }
 
     if (templateId) {
       const template = getTemplate(templateId);
@@ -61,65 +85,86 @@ function GenerateContent() {
       }
     }
 
-    if (projectParam) {
-      const project = getProject(projectParam);
-      if (project) {
-        setActiveProjectId(project.id);
-        setProjectId(project.id);
-        setTitle(project.title);
-        setPrompt(project.prompt);
-        setDiagramType(project.diagramType);
-        setResult(project.result ?? null);
-        if (project.result) setEditPromptOpen(false);
-        return;
-      }
-    }
-
-    if (isNew) {
-      const dt = typeFromUrl ?? settings.defaultDiagramType;
-      const project = createProject({
-        title: typeFromUrl && typeFromUrl !== "architecture" ? `${typeFromUrl} Diagram` : "Untitled Architecture",
-        prompt: "",
-        diagramType: dt,
-      });
-      setProjectId(project.id);
-      setDiagramType(dt);
-      setTitle(project.title);
+    if (isNew === "1") {
+      setProjectId(null);
+      setTitle("Untitled Architecture");
+      setPrompt("");
       setResult(null);
-      setEditPromptOpen(true);
+      setActiveGraph(null);
+      setSelectedComponent(null);
+      setShowInspector(false);
+      setDiagramType(typeFromUrl ?? settings.defaultDiagramType);
       return;
     }
 
-    const activeId = getActiveProjectId();
-    if (activeId) {
-      const project = getProject(activeId);
+    const targetId = projectParam || getActiveProjectId();
+    if (targetId) {
+      const project = getProject(targetId);
       if (project) {
         setProjectId(project.id);
         setTitle(project.title);
         setPrompt(project.prompt);
         setDiagramType(project.diagramType);
-        setResult(project.result ?? null);
-        if (project.result) setEditPromptOpen(false);
-        return;
+        if (project.result) {
+          setResult(project.result);
+          const parsed = parseMermaidToGraph(project.result.mermaidCode, project.result.diagramType, project.result.title, project.result.explanation.components, project.result.technologies);
+          setActiveGraph(parsed);
+          setShowInspector(true);
+          setEditPromptOpen(false);
+        }
       }
     }
-
-    const dt = typeFromUrl ?? settings.defaultDiagramType;
-    const project = createProject({ title: "Untitled Architecture", prompt: "", diagramType: dt });
-    setProjectId(project.id);
-    setDiagramType(dt);
   }, [searchParams]);
 
-  const persistProject = useCallback(
-    (updates: { title?: string; prompt?: string; diagramType?: DiagramType; result?: ArchitectureResult }) => {
-      if (!projectId) return;
-      const existing = getProject(projectId);
-      if (!existing) return;
-      saveProject({ ...existing, ...updates, updatedAt: new Date().toISOString() });
+  const commitGraphUpdate = useCallback(
+    (newGraph: ArchitectureGraph, customResult?: ArchitectureResult) => {
+      setActiveGraph(newGraph);
+      const generatedMermaid = graphToMermaid(newGraph);
+      const score = evaluateArchitectureScore(newGraph);
+      const risks = analyzeArchitectureRisks(newGraph);
+
+      const updatedResult: ArchitectureResult = customResult || {
+        title: newGraph.title,
+        diagramType: newGraph.diagramType,
+        mermaidCode: generatedMermaid,
+        explanation: result?.explanation || {
+          overview: `Production specification for ${newGraph.title}.`,
+          components: newGraph.nodes.map((n) => ({ name: n.name, description: n.description })),
+          dataFlow: "HTTP / Ingress -> Microservices -> Persistence",
+          technologyChoices: newGraph.nodes.map((n) => n.technology).join(", "),
+          scalability: score.scalability.reason,
+          security: score.security.reason,
+          reliability: score.reliability.reason,
+          tradeoffs: "Decoupled architecture balances scalability with service tracing overhead.",
+          improvements: "Add distributed tracing and multi-region read replicas.",
+        },
+        technologies: Array.from(new Set(newGraph.nodes.map((n) => n.technology))),
+        adaptiveInsights: {
+          health: score.overall,
+          healthLabel: score.label,
+          scalability: score.scalability.score,
+          maintainability: score.maintainability.score,
+          reliability: score.reliability.score,
+          security: score.security.score,
+          adaptability: score.coupling.score,
+          potentialIssues: risks.map((r) => r.title),
+          suggestions: risks.map((r) => ({ current: r.title, suggested: r.recommendedSolution, reason: r.whyItMatters, category: "scalability" })),
+        },
+      };
+
+      setResult(updatedResult);
+      setTitle(newGraph.title);
+
+      if (projectId) {
+        saveProject({ id: projectId, title: newGraph.title, description: "", prompt, diagramType: newGraph.diagramType, result: updatedResult, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+      } else {
+        const created = createProject({ title: newGraph.title, prompt, diagramType: newGraph.diagramType, result: updatedResult });
+        setProjectId(created.id);
+      }
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     },
-    [projectId],
+    [projectId, prompt, result]
   );
 
   async function generate(refineInstruction?: string): Promise<string | null> {
@@ -135,36 +180,33 @@ function GenerateContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(
           refineInstruction
-            ? { refineInstruction, currentArchitecture: result }
+            ? { refineInstruction, currentArchitecture: result, diagramType }
             : { idea: prompt, diagramType },
         ),
       });
 
       const data = await res.json();
-
       if (!res.ok) {
         setError(data.error || "We couldn't generate your architecture right now.");
-        addHistoryEntry({
-          id: generateId(), projectId: projectId ?? "unknown", projectTitle: title,
-          prompt: refineInstruction ?? prompt, diagramType, status: "error",
-          error: data.error, createdAt: new Date().toISOString(),
-        });
         return data.error ?? null;
       }
 
       const architecture = data as ArchitectureResult;
-      setResult(architecture);
-      setTitle(architecture.title);
+      const parsedGraph = parseMermaidToGraph(architecture.mermaidCode, architecture.diagramType, architecture.title, architecture.explanation.components, architecture.technologies);
+
+      commitGraphUpdate(parsedGraph, architecture);
+      setShowInspector(true);
       setEditPromptOpen(false);
 
-      if (projectId) {
-        persistProject({ title: architecture.title, prompt, diagramType: architecture.diagramType, result: architecture });
-      }
-
       addHistoryEntry({
-        id: generateId(), projectId: projectId ?? "unknown", projectTitle: architecture.title,
-        prompt: refineInstruction ?? prompt, diagramType: architecture.diagramType,
-        status: "success", result: architecture, createdAt: new Date().toISOString(),
+        id: generateId(),
+        projectId: projectId ?? "unknown",
+        projectTitle: architecture.title,
+        prompt: refineInstruction ?? prompt,
+        diagramType: architecture.diagramType,
+        status: "success",
+        result: architecture,
+        createdAt: new Date().toISOString(),
       });
 
       return `Architecture updated: ${architecture.title}`;
@@ -176,68 +218,80 @@ function GenerateContent() {
     }
   }
 
-  function handleExport() {
-    if (!result) return;
-    downloadText(toMarkdownExport(result), `${result.title.replace(/\s+/g, "-").toLowerCase()}.md`, "text/markdown");
+  function handleOptimize() {
+    if (!activeGraph) return;
+    const optRes = optimizeArchitecture(activeGraph);
+    setOptimizationResult(optRes);
   }
 
-  function handleFullscreen() {
-    canvasRef.current?.querySelector("[data-diagram-root]")?.requestFullscreen?.();
+  function handleApplyOptimized() {
+    if (!optimizationResult) return;
+    commitGraphUpdate(optimizationResult.optimizedGraph);
+    setOptimizationResult(null);
+  }
+
+  function handleExecuteMutation(type: string, targetId?: string) {
+    if (!activeGraph) return;
+    if (type === "ADD_CACHE") {
+      const targetName = targetId || activeGraph.nodes.find((n) => n.type === "database")?.name || activeGraph.nodes[0]?.name;
+      const mutated = addCacheToGraph(activeGraph, targetName);
+      commitGraphUpdate(mutated);
+    } else if (type === "ADD_GATEWAY") {
+      const mutated = addGatewayToGraph(activeGraph);
+      commitGraphUpdate(mutated);
+    } else if (type === "IMPROVE_COMPONENT" && targetId) {
+      const mutated = improveComponentInGraph(activeGraph, targetId, "Added multi-region auto-scaling and connection pool isolation.");
+      commitGraphUpdate(mutated);
+    }
+    setPendingMutation(null);
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-[#0a0b04]">
-      {/* Top Header */}
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-[#0a0b04] text-[#f2f1da]">
       <WorkspaceHeader
         title={title}
-        onTitleChange={(v) => { setTitle(v); persistProject({ title: v }); }}
+        onTitleChange={(v) => { setTitle(v); if (activeGraph) commitGraphUpdate({ ...activeGraph, title: v }); }}
         diagramType={diagramType}
         saved={saved}
-        onExport={result ? handleExport : undefined}
-        onFullscreen={result ? handleFullscreen : undefined}
+        onExport={() => result && downloadText(toMarkdownExport(result), `${title.toLowerCase().replace(/\s+/g, "-")}.md`)}
+        onFullscreen={() => canvasRef.current?.requestFullscreen()}
       />
 
-      {/* Main Content Area */}
-      <div className="relative flex min-h-0 flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0 min-w-0 overflow-hidden">
         {!result ? (
-          /* INITIAL VIEW: Centered main Describe Box with neat top padding */
-          <div className="flex-1 overflow-y-auto p-6 sm:p-10 flex items-start justify-center pt-8 sm:pt-12 pb-20">
-            <div className="w-full max-w-4xl space-y-6">
+          <div className="flex flex-1 items-center justify-center p-6 overflow-y-auto">
+            <div className="w-full max-w-2xl space-y-6">
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowJourney(true)}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-[#7bc963]/40 bg-[#7bc963]/10 px-4 py-2.5 text-xs font-bold text-[#7bc963] hover:bg-[#7bc963] hover:text-[#0a0b04] transition-all shadow-[0_0_20px_rgba(123,201,99,0.2)]"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  <span>✨ Launch Guided Journey</span>
+                </button>
+              </div>
+
               <AIGenerationPanel
                 prompt={prompt}
-                onPromptChange={(v) => { setPrompt(v); persistProject({ prompt: v }); }}
+                onPromptChange={setPrompt}
                 diagramType={diagramType}
-                onDiagramTypeChange={(v) => { setDiagramType(v); persistProject({ diagramType: v }); }}
-                loading={loading}
+                onDiagramTypeChange={setDiagramType}
                 onGenerate={() => generate()}
+                loading={loading}
               />
-
-              {loading && <LoadingSequence active={loading} />}
-
+              {loading && <LoadingSequence />}
               {error && (
-                <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-5 text-rose-300">
-                  <div className="flex items-center gap-3">
-                    <AlertCircle className="h-5 w-5 shrink-0 text-rose-400" />
-                    <div>
-                      <h3 className="font-bold text-white">Generation Failed</h3>
-                      <p className="text-xs">{error}</p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => generate()}
-                    className="mt-3 rounded-xl bg-rose-500/20 px-4 py-1.5 text-xs font-bold text-white border border-rose-500/40"
-                  >
-                    Try Again
-                  </button>
+                <div className="flex items-center gap-3 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-300">
+                  <AlertCircle className="h-5 w-5 shrink-0" />
+                  <span>{error}</span>
                 </div>
               )}
             </div>
           </div>
         ) : (
-          /* GENERATED VIEW: Canvas is Main, Prompt collapsible at top, Context Panel toggleable */
           <div className="flex flex-1 min-w-0 flex-col overflow-hidden">
-            {/* Top Prompt Action Bar */}
+            {/* Top Action & Prompt Bar */}
             <div className="shrink-0 border-b border-[#dddb9d]/15 bg-[#12140a]/90 px-6 py-3 backdrop-blur-xl">
               <div className="flex items-center justify-between gap-4">
                 <button
@@ -253,77 +307,74 @@ function GenerateContent() {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
+                    onClick={() => setShowJourney(true)}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#7bc963]/40 bg-[#7bc963]/10 px-3.5 py-1.5 text-xs font-bold text-[#7bc963] hover:bg-[#7bc963] hover:text-[#0a0b04] transition-all"
+                  >
+                    <Sparkles className="h-3.5 w-3.5 text-[#7bc963]" />
+                    <span>✨ Journey</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleOptimize}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#7bc963]/40 bg-[#7bc963]/10 px-3.5 py-1.5 text-xs font-bold text-[#7bc963] hover:bg-[#7bc963] hover:text-[#0a0b04] transition-all shadow-[0_0_15px_rgba(123,201,99,0.2)]"
+                  >
+                    <Zap className="h-3.5 w-3.5" />
+                    <span>✨ Optimize</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowSimulator(true)}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#dddb9d]/20 bg-[#12140a] px-3.5 py-1.5 text-xs font-bold text-[#f2f1da] hover:border-[#7bc963] transition-all"
+                  >
+                    <Cpu className="h-3.5 w-3.5 text-[#7bc963]" />
+                    <span>Simulate</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowArtifacts(true)}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#dddb9d]/20 bg-[#12140a] px-3.5 py-1.5 text-xs font-bold text-[#c8c69d] hover:border-[#dddb9d]/40 transition-all"
+                  >
+                    <Code2 className="h-3.5 w-3.5" />
+                    <span>Artifacts</span>
+                  </button>
+
+                  <button
+                    type="button"
                     onClick={() => generate()}
                     disabled={loading}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#dddb9d]/20 bg-[#dddb9d]/10 px-3.5 py-1.5 text-xs font-bold text-[#7bc963] hover:bg-[#7bc963] hover:text-[#0a0b04] transition-all"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#dddb9d]/20 bg-[#dddb9d]/10 px-3.5 py-1.5 text-xs font-bold text-[#c8c69d] hover:text-[#f2f1da] transition-all"
                   >
                     <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-                    Regenerate
+                    <span>Regenerate</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setShowInspector(!showInspector)}
                     className={`inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-1.5 text-xs font-bold transition-all ${
-                      showInspector
-                        ? "border-[#7bc963] bg-[#7bc963] text-[#0a0b04]"
-                        : "border-[#dddb9d]/20 bg-[#12140a] text-[#f2f1da] hover:border-[#dddb9d]/40"
+                      showInspector ? "border-[#7bc963] bg-[#7bc963] text-[#0a0b04]" : "border-[#dddb9d]/20 bg-[#12140a] text-[#f2f1da]"
                     }`}
                   >
                     <PanelRight className="h-4 w-4" />
-                    <span>{showInspector ? "Hide Inspector" : "Context Inspector"}</span>
+                    <span>Inspector</span>
                   </button>
                 </div>
               </div>
 
               {editPromptOpen && (
-                <div className="mt-4 pt-4 border-t border-[#dddb9d]/15 animate-fade-in space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <label className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#7bc963] flex items-center gap-2">
-                      <Sparkles className="h-3.5 w-3.5" /> Modify Architecture Specification Prompt
-                    </label>
-
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono text-[#8e8c6c]">Diagram Spec:</span>
-                      <select
-                        value={diagramType}
-                        onChange={(e) => {
-                          const v = e.target.value as DiagramType;
-                          setDiagramType(v);
-                          persistProject({ diagramType: v });
-                        }}
-                        className="rounded-xl border border-[#dddb9d]/20 bg-[#070804] px-3 py-1.5 text-xs font-bold text-[#f2f1da] outline-none"
-                      >
-                        {(Object.entries(DIAGRAM_TYPE_LABELS) as [DiagramType, string][]).map(([v, l]) => (
-                          <option key={v} value={v} className="bg-[#12140a]">{l}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="relative">
-                    <textarea
-                      value={prompt}
-                      onChange={(e) => {
-                        setPrompt(e.target.value);
-                        persistProject({ prompt: e.target.value });
-                      }}
-                      rows={3}
-                      placeholder="Describe architectural modifications, caching strategies, microservices, or database updates..."
-                      className="w-full resize-none rounded-2xl border border-[#dddb9d]/20 bg-[#070804] p-4 text-xs leading-relaxed text-[#f2f1da] placeholder-[#8e8c6c] outline-none focus:border-[#7bc963]"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="text-[11px] text-[#8e8c6c]">Press Cmd+Enter or click Regenerate to update diagram.</span>
-                    <button
-                      type="button"
-                      onClick={() => generate()}
-                      disabled={loading}
-                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#dddb9d] via-[#7bc963] to-[#567f2b] px-5 py-2 text-xs font-bold text-[#0a0b04] shadow-[0_0_20px_rgba(123,201,99,0.3)] hover:scale-[1.02] transition-all disabled:opacity-50"
-                    >
-                      <Wand2 className="h-3.5 w-3.5" />
-                      <span>Synthesize Updated Canvas</span>
+                <div className="mt-4 pt-4 border-t border-[#dddb9d]/15 space-y-3">
+                  <textarea
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    rows={2}
+                    className="w-full resize-none rounded-2xl border border-[#dddb9d]/20 bg-[#070804] p-3 text-xs leading-relaxed text-[#f2f1da] outline-none focus:border-[#7bc963]"
+                  />
+                  <div className="flex justify-end">
+                    <button type="button" onClick={() => generate()} disabled={loading} className="rounded-xl bg-[#7bc963] px-4 py-1.5 text-xs font-bold text-[#0a0b04]">
+                      Synthesize Updated Architecture
                     </button>
                   </div>
                 </div>
@@ -338,18 +389,44 @@ function GenerateContent() {
                   result={result}
                   onRegenerate={() => generate()}
                   selectedComponent={selectedComponent}
-                  onSelectComponent={setSelectedComponent}
+                  highlightedNodeIds={highlightedNodeIds}
+                  onSelectComponent={(compName) => {
+                    setSelectedComponent(compName);
+                    if (compName && activeGraph) {
+                      const found = activeGraph.nodes.find((n) => n.name.toLowerCase() === compName.toLowerCase() || n.id.toLowerCase() === compName.toLowerCase());
+                      if (found) setDetailNode(found);
+                    }
+                  }}
                 />
               </div>
 
-              {/* Toggleable Context Inspector Drawer */}
+              {/* Context Inspector Drawer */}
               {showInspector && (
-                <aside className="w-80 sm:w-96 border-l border-[#dddb9d]/15 bg-[#12140a]/95 backdrop-blur-2xl overflow-y-auto shrink-0 h-full z-10">
+                <aside className="w-80 sm:w-[380px] border-l border-[#dddb9d]/15 bg-[#12140a]/95 backdrop-blur-2xl overflow-y-auto shrink-0 h-full z-10">
                   <PropertyInspector
                     result={result}
+                    graph={activeGraph}
                     selectedComponent={selectedComponent}
                     onSelectComponent={setSelectedComponent}
                     onRefine={(instruction) => generate(instruction)}
+                    onOptimize={handleOptimize}
+                    onSimulate={() => setShowSimulator(true)}
+                    onArtifacts={() => setShowArtifacts(true)}
+                    onSelectRiskNodes={(nodeIds) => {
+                      setHighlightedNodeIds(nodeIds);
+                      if (nodeIds.length > 0 && activeGraph) {
+                        const matched = activeGraph.nodes.find((n) => nodeIds.includes(n.id));
+                        if (matched) setSelectedComponent(matched.name);
+                      }
+                    }}
+                    onApplyMutation={(type, targetId) => {
+                      setPendingMutation({
+                        type,
+                        targetId,
+                        title: `Confirm Graph Mutation (${type})`,
+                        desc: `Executing this mutation will update ArchitectureGraph, re-evaluate health scores, and push a version snapshot.`,
+                      });
+                    }}
                     loading={loading}
                     className="h-full"
                   />
@@ -360,6 +437,87 @@ function GenerateContent() {
         )}
       </div>
 
+      {/* Confirmation Modal for AI Graph Mutations */}
+      {pendingMutation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-xl">
+          <div className="w-full max-w-md rounded-3xl border border-[#dddb9d]/20 bg-[#0a0b04] p-6 space-y-4 text-[#f2f1da] shadow-2xl">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-6 w-6 text-amber-400 shrink-0" />
+              <h3 className="text-base font-bold">{pendingMutation.title}</h3>
+            </div>
+            <p className="text-xs text-[#c8c69d] leading-relaxed">{pendingMutation.desc}</p>
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setPendingMutation(null)}
+                className="rounded-xl border border-[#dddb9d]/15 bg-[#12140a] px-4 py-2 text-xs font-bold text-[#c8c69d]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleExecuteMutation(pendingMutation.type, pendingMutation.targetId)}
+                className="rounded-xl bg-[#7bc963] px-4 py-2 text-xs font-bold text-[#0a0b04]"
+              >
+                Confirm &amp; Apply Mutation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Guided Journey Modal */}
+      {showJourney && (
+        <GuidedJourneyModal
+          graph={activeGraph}
+          onClose={() => setShowJourney(false)}
+          onGeneratePrompt={async (pText) => {
+            setPrompt(pText);
+            await generate();
+          }}
+          onHighlightNodes={(nodeIds) => setHighlightedNodeIds(nodeIds)}
+          onApplyOptimization={handleApplyOptimized}
+          onOpenArtifacts={() => setShowArtifacts(true)}
+          onOpenCopilot={() => {}}
+        />
+      )}
+
+      {/* Modals */}
+      {optimizationResult && (
+        <ComparisonModal
+          result={optimizationResult}
+          onClose={() => setOptimizationResult(null)}
+          onApplyOptimized={handleApplyOptimized}
+        />
+      )}
+
+      {showSimulator && activeGraph && (
+        <ArchitectureSimulator
+          graph={activeGraph}
+          onClose={() => setShowSimulator(false)}
+          onHighlightBottlenecks={(bNodeIds) => {
+            setHighlightedNodeIds(bNodeIds);
+            const first = activeGraph.nodes.find((n) => bNodeIds.includes(n.id));
+            if (first) setSelectedComponent(first.name);
+          }}
+        />
+      )}
+
+      {showArtifacts && activeGraph && (
+        <ArtifactsModal
+          graph={activeGraph}
+          onClose={() => setShowArtifacts(false)}
+        />
+      )}
+
+      {detailNode && activeGraph && (
+        <ComponentDetailModal
+          node={detailNode}
+          graph={activeGraph}
+          onClose={() => setDetailNode(null)}
+        />
+      )}
+
       <AIAssistantDock onAsk={(q) => generate(q)} loading={loading} projectTitle={title} />
     </div>
   );
@@ -367,7 +525,7 @@ function GenerateContent() {
 
 export default function GeneratePage() {
   return (
-    <Suspense fallback={<div className="p-8 text-sm text-[#c8c69d]">Loading workspace…</div>}>
+    <Suspense fallback={<div className="p-8 text-sm text-[#c8c69d]">Loading Arqen workspace…</div>}>
       <GenerateContent />
     </Suspense>
   );

@@ -49,25 +49,34 @@ export default function DashboardView() {
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#7bc963]/30 bg-[#7bc963]/10 px-3.5 py-1 backdrop-blur-md">
               <span className="h-2 w-2 animate-pulse rounded-full bg-[#7bc963]" />
               <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-[#7bc963]">
-                Architecture Workspace Active
+                Arqen Intelligence Platform Active
               </span>
             </div>
             <h1 className="text-4xl font-extrabold tracking-tight text-[#f2f1da] sm:text-5xl">
               {getGreeting()}, Architect
             </h1>
             <p className="mt-2 text-base text-[#c8c69d] max-w-xl">
-              Synthesize software diagrams, audit system resilience, and document cloud topologies with AI.
+              Design, analyze, optimize, and evolve software architecture graphs with Arqen.
             </p>
           </div>
 
-          <Link
-            href="/workspace/generate?new=1"
-            className="group inline-flex shrink-0 items-center gap-2.5 rounded-2xl bg-gradient-to-r from-[#dddb9d] via-[#7bc963] to-[#567f2b] px-6 py-4 text-sm font-bold text-[#0a0b04] shadow-[0_0_30px_rgba(123,201,99,0.3)] transition-all hover:scale-[1.03]"
-          >
-            <Sparkles className="h-4 w-4" />
-            New Architecture
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
+          <div className="flex items-center gap-3 shrink-0">
+            <Link
+              href="/workspace/generate?journey=1"
+              className="inline-flex items-center gap-2 rounded-2xl border border-[#7bc963]/40 bg-[#7bc963]/10 px-5 py-4 text-sm font-bold text-[#7bc963] hover:bg-[#7bc963] hover:text-[#0a0b04] transition-all shadow-[0_0_20px_rgba(123,201,99,0.2)]"
+            >
+              <Sparkles className="h-4 w-4 text-[#7bc963]" />
+              <span>✨ Guided Journey</span>
+            </Link>
+
+            <Link
+              href="/workspace/generate?new=1"
+              className="group inline-flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-[#dddb9d] via-[#7bc963] to-[#567f2b] px-6 py-4 text-sm font-bold text-[#0a0b04] shadow-[0_0_30px_rgba(123,201,99,0.3)] transition-all hover:scale-[1.03]"
+            >
+              <span>New Architecture</span>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
         </div>
       </div>
 

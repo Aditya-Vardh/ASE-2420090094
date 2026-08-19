@@ -1,7 +1,7 @@
 # Arqin AI
 
 <p align="center">
-  <img src="public/og-image.png" alt="Arqin AI" width="1200" />
+  <img src="arqenai.png" alt="Arqin AI" width="1200" />
 </p>
 
 <p align="center">

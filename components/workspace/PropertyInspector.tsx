@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import {
-  LayoutGrid, Boxes, GitBranch, Sparkles, RefreshCw, ChevronDown, Zap, ShieldAlert, Cpu, Code2, AlertTriangle, ArrowRight, ShieldCheck, Eye, Layers, DollarSign, Activity, CheckCircle2, Play
+  LayoutGrid, Boxes, GitBranch, Sparkles, ChevronDown, Zap, ShieldAlert, AlertTriangle, ShieldCheck, Eye, Layers, DollarSign, Activity, CheckCircle2
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { ArchitectureResult } from "@/lib/storage/types";
@@ -106,40 +106,6 @@ export default function PropertyInspector({
         </button>
       </div>
 
-      {/* Primary Actions Bar */}
-      <div className="grid grid-cols-3 gap-1.5 border-b border-[#dddb9d]/15 bg-[#070804] p-2">
-        {onOptimize && (
-          <button
-            type="button"
-            onClick={onOptimize}
-            className="flex flex-col items-center justify-center gap-1 rounded-xl border border-[#7bc963]/30 bg-[#7bc963]/10 py-2 text-[10px] font-bold text-[#7bc963] hover:bg-[#7bc963] hover:text-[#0a0b04] transition-all"
-          >
-            <Zap className="h-3.5 w-3.5" />
-            <span>Optimize</span>
-          </button>
-        )}
-        {onSimulate && (
-          <button
-            type="button"
-            onClick={onSimulate}
-            className="flex flex-col items-center justify-center gap-1 rounded-xl border border-[#dddb9d]/20 bg-[#12140a] py-2 text-[10px] font-bold text-[#f2f1da] hover:border-[#7bc963] transition-all"
-          >
-            <Cpu className="h-3.5 w-3.5 text-[#7bc963]" />
-            <span>Simulate</span>
-          </button>
-        )}
-        {onArtifacts && (
-          <button
-            type="button"
-            onClick={onArtifacts}
-            className="flex flex-col items-center justify-center gap-1 rounded-xl border border-[#dddb9d]/20 bg-[#12140a] py-2 text-[10px] font-bold text-[#c8c69d] hover:border-[#dddb9d]/40 transition-all"
-          >
-            <Code2 className="h-3.5 w-3.5 text-[#dddb9d]" />
-            <span>Artifacts</span>
-          </button>
-        )}
-      </div>
-
       {/* Navigation Tabs */}
       <div className="inspector-body">
         <nav className={`inspector-tab-rail ${mobileOpen ? "inspector-tab-rail-open" : ""}`}>
@@ -187,11 +153,12 @@ export default function PropertyInspector({
             {tab === "overview" && (
               <div className="space-y-4">
                 <div className="rounded-2xl border border-[#7bc963]/30 bg-[#7bc963]/10 p-5 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#7bc963]">Unified Architecture Score</span>
-                    <span className="font-mono text-xl font-extrabold text-[#7bc963]">{unifiedIntel.overallHealthScore} / 100</span>
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#7bc963] mb-1">Unified Architecture Score</p>
+                  <div className="flex items-end gap-1.5">
+                    <span className="font-mono text-4xl font-extrabold leading-none text-[#7bc963]">{unifiedIntel.overallHealthScore}</span>
+                    <span className="font-mono text-sm font-bold text-[#7bc963]/60 pb-1">/100</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-[#c8c69d]">
+                  <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-[#c8c69d] pt-1">
                     <div>Scalability: {unifiedIntel.dimensionScores.scalability}%</div>
                     <div>Reliability: {unifiedIntel.dimensionScores.reliability}%</div>
                     <div>Security: {unifiedIntel.dimensionScores.security}%</div>

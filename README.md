@@ -1,124 +1,170 @@
 # ArchiGen AI
 
-Turn natural-language software ideas into professional architecture diagrams, UML models, and technical documentation — powered by Groq AI and Mermaid.js.
+A modern AI-powered platform for generating architecture diagrams, technical documentation, and system design guidance from natural-language prompts.
 
-![ArchiGen AI](public/og-image.png)
+ArchiGen AI helps product teams, developers, and architects move from an idea to a structured architecture model in minutes. It combines AI-assisted generation with Mermaid-based visual output and an interactive workspace for refinement and iteration.
+
+## Overview
+
+The application is built with Next.js and uses a Groq-backed AI pipeline to generate architecture artifacts such as:
+
+- Mermaid-based system diagrams
+- Component and interaction views
+- Architecture explanations and trade-offs
+- Research insights for design patterns and best practices
+- Project templates and revision history
 
 ## Features
 
-- **AI Architecture Generation** — Describe your system and get structured architecture with Mermaid diagrams
-- **Multiple Diagram Types** — Class, sequence, ER, flowchart, component, deployment, state, and architecture diagrams
-- **Architecture Explanations** — Overview, components, data flow, scalability, security, reliability, trade-offs, and improvements
-- **Diagram Refinement** — Iterate with natural language instructions without starting over
-- **Architecture Research** — Ask structured questions about patterns, technologies, and trade-offs
-- **Projects & History** — Save projects and browse generation history (localStorage)
-- **Templates** — 13 starter templates for common systems
-- **Export** — PNG, SVG, Markdown, and PDF (via print)
+- AI-generated architecture and system design output from plain language prompts
+- Multiple diagram types, including architecture, flow, component, ER, and sequence views
+- Guided refinement workflow with iterative changes based on user instructions
+- Architecture research assistance for patterns, trade-offs, and implementation guidance
+- Project history and saved work using browser-based persistence
+- Reusable starter templates for common system types
+- Export-friendly architecture output for documentation and review
 
 ## Tech Stack
 
-- **Next.js 16** (App Router)
-- **TypeScript**
-- **Tailwind CSS 4**
-- **Groq AI** via Vercel AI SDK
-- **Mermaid.js** for diagram rendering
-- **Lucide React** for icons
-- **localStorage** for project persistence
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Mermaid.js
+- Vercel AI SDK
+- Groq AI
+- Lucide React
+
+## Project Structure
+
+```text
+ase_project/
+├── app/
+│   ├── api/
+│   │   ├── generate/
+│   │   └── research/
+│   ├── workspace/
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   ├── landing/
+│   ├── ui/
+│   └── workspace/
+├── lib/
+│   ├── ai/
+│   ├── analysis/
+│   ├── artifacts/
+│   ├── graph/
+│   ├── intelligence/
+│   ├── optimizer/
+│   ├── simulator/
+│   ├── storage/
+│   ├── adaptive.ts
+│   ├── export.ts
+│   ├── mermaid.ts
+│   ├── mermaid-repair.ts
+│   ├── rate-limit.ts
+│   └── templates.ts
+├── public/
+├── package.json
+├── pnpm-lock.yaml
+├── next.config.ts
+├── tsconfig.json
+├── postcss.config.mjs
+├── eslint.config.mjs
+└── README.md
+```
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
-- A [Groq API key](https://console.groq.com/)
+- Node.js 18 or newer
+- pnpm
+- A valid Groq API key
 
-### Setup
+### Installation
 
 1. Clone the repository:
 
 ```bash
-git clone <your-repo-url>
+git clone <repository-url>
 cd ase_project
 ```
 
 2. Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
-3. Create `.env.local`:
+3. Create a local environment file:
+
+```bash
+copy .env.example .env.local
+```
+
+If `.env.example` is not present, create `.env.local` manually with:
 
 ```env
 GROQ_API_KEY=your_groq_api_key_here
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
-NEXT_PUBLIC_GITHUB_URL=https://github.com/your-username/archigen
 ```
 
-4. Run the development server:
+### Run the Application
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) for the landing page, or [http://localhost:3000/workspace](http://localhost:3000/workspace) for the generator.
+Then open:
 
-## Main User Flow
+- http://localhost:3000 for the landing page
+- http://localhost:3000/workspace for the app workspace
 
-1. Visit the **landing page** and click **Generate Architecture** or **Open App**
-2. In the **workspace**, describe your system and select a diagram type
-3. Click **Generate Architecture** — AI returns a Mermaid diagram + structured explanation
-4. **Refine** with follow-up instructions, **export** as PNG/SVG/Markdown, or **save** to projects
-5. Browse **Templates**, **History**, or use **Research** for architecture questions
+## Environment Variables
 
-## Project Structure
+| Variable | Description |
+| --- | --- |
+| `GROQ_API_KEY` | API key used by the server-side generation and research endpoints |
+| `NEXT_PUBLIC_SITE_URL` | Base site URL used for app metadata and local routing |
 
-```
-app/
-  page.tsx                 # Landing page
-  workspace/               # Main application
-    page.tsx               # Generator workspace
-    projects/              # Project management
-    history/               # Generation history
-    templates/             # Architecture templates
-    research/              # Architecture research
-    settings/              # User preferences
-  api/
-    generate/route.ts      # Architecture generation (Groq)
-    research/route.ts      # Research queries (Groq)
-components/
-  landing/                 # Landing page sections
-  workspace/               # Workspace UI (sidebar, canvas, etc.)
-lib/
-  ai/                      # AI schemas, prompts, models
-  storage/                 # localStorage persistence
-  templates.ts             # Template definitions
-  export.ts                # Export utilities
-  rate-limit.ts            # API rate limiting
-```
+## Core User Flow
 
-## Security
+1. Open the landing page and start a new architecture session.
+2. Describe the system or application idea in natural language.
+3. Select a diagram type or generation context.
+4. Generate architecture output and review the Mermaid diagram.
+5. Refine the design with follow-up prompts or edit the generated structure.
+6. Save, export, or continue iterating in the workspace.
 
-- `GROQ_API_KEY` is used **only** in server-side API routes — never exposed to the client
-- Basic in-memory rate limiting (10 requests/minute per IP)
-- Mermaid rendered with `securityLevel: "strict"`
-- Input validation on all API endpoints
+## Available Routes
 
-## Build
+- `/` — marketing and product landing page
+- `/workspace` — main architecture generation interface
+- `/workspace/generate` — generation flow
+- `/workspace/history` — saved or previous sessions
+- `/workspace/templates` — starter templates
+- `/workspace/research` — architecture research assistant
+- `/workspace/projects` — project management area
+- `/workspace/settings` — user settings
+
+## Scripts
 
 ```bash
-npm run build
-npm start
+pnpm dev       # Start local development server
+pnpm build     # Create production build
+pnpm start     # Run the built app
+pnpm lint      # Run ESLint checks
 ```
 
-## Limitations
+## Notes
 
-- No authentication or cloud sync — projects stored in browser localStorage only
-- Research uses AI knowledge only (no live web search)
-- PDF export opens browser print dialog (not a native PDF library)
-- Rate limiting is in-memory (resets on server restart)
+- Generation is powered by AI and may gracefully fall back to local synthesis if no API key is configured.
+- Project data is stored in the browser via local storage rather than a backend database.
+- The app is designed for rapid ideation and architecture iteration, not for production-grade authentication or team collaboration out of the box.
 
 ## License
 
-Private / educational use.
-# ASE-2420090094
+This project is intended for educational, prototype, and internal-use scenarios unless otherwise specified by the repository owner.

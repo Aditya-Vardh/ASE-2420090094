@@ -175,18 +175,16 @@ export default function ArchitectureCanvas({
           <button
             type="button"
             onClick={() => setView("diagram")}
-            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-              view === "diagram" ? "bg-[#7bc963] text-[#0a0b04]" : "text-[#c8c69d] hover:text-[#f2f1da]"
-            }`}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${view === "diagram" ? "bg-[#7bc963] text-[#0a0b04]" : "text-[#c8c69d] hover:text-[#f2f1da]"
+              }`}
           >
             Diagram View
           </button>
           <button
             type="button"
             onClick={() => setView("code")}
-            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-              view === "code" ? "bg-[#7bc963] text-[#0a0b04]" : "text-[#c8c69d] hover:text-[#f2f1da]"
-            }`}
+            className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${view === "code" ? "bg-[#7bc963] text-[#0a0b04]" : "text-[#c8c69d] hover:text-[#f2f1da]"
+              }`}
           >
             Mermaid Source
           </button>

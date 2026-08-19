@@ -1,59 +1,73 @@
-Arqin AI
+# Arqin AI
 
-A modern AI-powered platform for generating architecture diagrams, technical documentation, and system design guidance from natural-language prompts.
+<p align="center">
+  <img src="public/og-image.png" alt="Arqin AI" width="1200" />
+</p>
 
-Arqin AI helps product teams, developers, and architects move from an idea to a structured architecture model in minutes. It combines AI-assisted generation with Mermaid-based visual output and an interactive workspace for refinement and iteration.
+<p align="center">
+  <a href="#overview"><img src="https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white" alt="Next.js 16" /></a>
+  <a href="#overview"><img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" alt="TypeScript 5" /></a>
+  <a href="#overview"><img src="https://img.shields.io/badge/Groq-AI-FF6B35?logo=openai&logoColor=white" alt="Groq AI" /></a>
+  <a href="#overview"><img src="https://img.shields.io/badge/Mermaid-Diagrams-FF3670?logo=mermaid&logoColor=white" alt="Mermaid" /></a>
+</p>
 
-Overview
+A premium AI-powered architecture studio for turning natural-language ideas into structured system designs, technical diagrams, and implementation-ready documentation.
 
-The application is built with Next.js and uses a Groq-backed AI pipeline to generate architecture artifacts such as:
+Arqin AI helps teams, founders, and developers move from concept to architecture in minutes by combining AI intelligence with clean visual modeling and iterative refinement.
 
-Mermaid-based system diagrams
+---
 
-Component and interaction views
+## Overview
 
-Architecture explanations and trade-offs
+Arqin AI is a modern web application built with Next.js that generates architecture artifacts from plain-language prompts. The platform creates Mermaid diagrams and structured technical explanations that can be refined, reviewed, and reused throughout the design process.
 
-Research insights for design patterns and best practices
+It is designed for:
 
-Project templates and revision history
+- system design ideation
+- architecture visualization
+- technical planning and documentation
+- design trade-off analysis
+- iteration on existing architecture concepts
 
-Features
+---
 
-AI-generated architecture and system design output from plain language prompts
+## Highlights
 
-Multiple diagram types, including architecture, flow, component, ER, and sequence views
+### ✨ Core Features
 
-Guided refinement workflow with iterative changes based on user instructions
+- AI-generated architecture and system design output from plain-language prompts
+- Multiple diagram types, including architecture, flow, component, ER, and sequence views
+- Live refinement workflow to adjust generated designs based on user instructions
+- Architecture research assistance for patterns, trade-offs, and best practices
+- Project history and saved sessions with browser-based persistence
+- Reusable templates for common application patterns
+- Export-friendly diagrams for documentation, review, and presentation
 
-Architecture research assistance for patterns, trade-offs, and implementation guidance
+### 🎯 Why It Stands Out
 
-Project history and saved work using browser-based persistence
+- Fast concept-to-diagram workflow
+- Clean workspace for iterative design
+- Built around developer-friendly architecture thinking
+- Focused on visual clarity and technical communication
 
-Reusable starter templates for common system types
+---
 
-Export-friendly architecture output for documentation and review
+## Tech Stack
 
-Tech Stack
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Mermaid.js
+- Vercel AI SDK
+- Groq AI
+- Lucide React
 
-Next.js 16
+---
 
-React 19
+## Project Structure
 
-TypeScript
-
-Tailwind CSS 4
-
-Mermaid.js
-
-Vercel AI SDK
-
-Groq AI
-
-Lucide React
-
-Project Structure
-
+```text
 ase_project/
 ├── app/
 │   ├── api/
@@ -89,109 +103,113 @@ ase_project/
 ├── tsconfig.json
 ├── postcss.config.mjs
 ├── eslint.config.mjs
-└── README.md
+├── README.md
+└── .env.local
+```
 
-Getting Started
+---
 
-Prerequisites
+## Getting Started
 
-Node.js 18 or newer
+### Prerequisites
 
-pnpm
+- Node.js 18 or newer
+- pnpm
+- Groq API key
 
-A valid Groq API key
+### Installation
 
-Installation
+1. Clone the repository:
 
-Clone the repository:
-
+```bash
 git clone <repository-url>
 cd ase_project
+```
 
-Install dependencies:
+2. Install project dependencies:
 
+```bash
 pnpm install
+```
 
-Create a local environment file:
+3. Create a local environment file:
 
+```bash
 copy .env.example .env.local
+```
 
-If .env.example is not present, create .env.local manually with:
+If `.env.example` does not exist, create `.env.local` manually:
 
+```env
 GROQ_API_KEY=your_groq_api_key_here
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
 
-Run the Application
+### Run the app
 
+```bash
 pnpm dev
+```
 
-Then open:
+Then open the app in your browser:
 
-http://localhost:3000 for the landing page
+- http://localhost:3000 — landing page
+- http://localhost:3000/workspace — architecture workspace
 
-http://localhost:3000/workspace for the app workspace
+---
 
-Environment Variables
+## Configuration
 
-Variable
+| Variable | Description |
+| --- | --- |
+| `GROQ_API_KEY` | API key for AI-powered generation and research requests |
+| `NEXT_PUBLIC_SITE_URL` | Base URL used for local app metadata and routing |
 
-Description
+---
 
-GROQ_API_KEY
+## Core User Flow
 
-API key used by the server-side generation and research endpoints
+1. Open the landing page and start a new architecture session.
+2. Describe the system or application idea in natural language.
+3. Select the desired diagram or generation mode.
+4. Review the generated Mermaid diagram and architecture explanation.
+5. Refine the output using follow-up prompts and iteration.
+6. Save, revisit, or continue editing within the workspace.
 
-NEXT_PUBLIC_SITE_URL
+---
 
-Base site URL used for app metadata and local routing
+## Application Routes
 
-Core User Flow
+- `/` — landing page
+- `/workspace` — main architecture generation workspace
+- `/workspace/generate` — generation flow
+- `/workspace/history` — saved sessions and project history
+- `/workspace/templates` — starter templates
+- `/workspace/research` — architecture research assistant
+- `/workspace/projects` — project dashboards and saved work
+- `/workspace/settings` — preferences and settings
 
-Open the landing page and start a new architecture session.
+---
 
-Describe the system or application idea in natural language.
+## Available Scripts
 
-Select a diagram type or generation context.
+| Command | Description |
+| --- | --- |
+| `pnpm dev` | Start the development server |
+| `pnpm build` | Build the production app |
+| `pnpm start` | Run the production build |
+| `pnpm lint` | Run ESLint checks |
 
-Generate architecture output and review the Mermaid diagram.
+---
 
-Refine the design with follow-up prompts or edit the generated structure.
+## Notes
 
-Save, export, or continue iterating in the workspace.
+- AI generation may gracefully fall back to a local synthesis flow when no API key is present.
+- Project content is stored in the browser using local storage rather than a backend database.
+- This project is optimized for rapid architecture ideation and iteration rather than multi-user production authentication or cloud sync.
 
-Available Routes
+---
 
-/ — marketing and product landing page
-
-/workspace — main architecture generation interface
-
-/workspace/generate — generation flow
-
-/workspace/history — saved or previous sessions
-
-/workspace/templates — starter templates
-
-/workspace/research — architecture research assistant
-
-/workspace/projects — project management area
-
-/workspace/settings — user settings
-
-Scripts
-
-pnpm dev       # Start local development server
-pnpm build     # Create production build
-pnpm start     # Run the built app
-pnpm lint      # Run ESLint checks
-
-Notes
-
-Generation is powered by AI and may gracefully fall back to local synthesis if no API key is configured.
-
-Project data is stored in the browser via local storage rather than a backend database.
-
-The app is designed for rapid ideation and architecture iteration, not for production-grade authentication or team collaboration out of the box.
-
-License
+## License
 
 This project is intended for educational, prototype, and internal-use scenarios unless otherwise specified by the repository owner.
